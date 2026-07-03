@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CalendarDays, ExternalLink, MapPin, MessageCircle, Send, UserRound } from 'lucide-react';
+import { ArrowLeft, CalendarDays, ExternalLink, Gavel, MapPin, MessageCircle, Send, UserRound, UsersRound } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Stars from '../components/conference/Stars';
@@ -80,6 +80,14 @@ export default function ConferencePage() {
             date_end: mock.endDate,
             city: mock.city,
             registration_link: mock.registrationUrl,
+            telegram_url: mock.telegramUrl,
+            website_url: mock.websiteUrl,
+            description: mock.description,
+            venue: mock.venue,
+            secretariat: mock.secretariat,
+            committees: mock.committees,
+            fee: mock.fee,
+            capacity: mock.capacity,
             secretary_general_name: null,
             secretary_general_telegram: null,
           });
@@ -120,6 +128,11 @@ export default function ConferencePage() {
   }
 
   const status = STATUS[conference.registration_status] ?? STATUS.planned;
+  const telegramUrl =
+    conference.telegram_url ||
+    (conference.contact_telegram ? `https://t.me/${conference.contact_telegram.replace(/^@/, '')}` : null);
+  const websiteUrl = conference.website_url || conference.registration_link;
+  const committees = Array.isArray(conference.committees) ? conference.committees : [];
   const averageRating = reviews.length
     ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null;
@@ -187,6 +200,28 @@ export default function ConferencePage() {
                   <ExternalLink size={14} aria-hidden="true" />
                 </a>
               )}
+              {telegramUrl && (
+                <a
+                  href={telegramUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-un-800/15 px-4 text-sm font-semibold text-un-700 transition-colors hover:border-un-400"
+                >
+                  <Send size={14} aria-hidden="true" />
+                  Telegram channel
+                </a>
+              )}
+              {websiteUrl && websiteUrl !== conference.registration_link && (
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex h-10 items-center gap-2 rounded-md border border-un-800/15 px-4 text-sm font-semibold text-un-700 transition-colors hover:border-un-400"
+                >
+                  <ExternalLink size={14} aria-hidden="true" />
+                  Website
+                </a>
+              )}
               <a
                 href={shareUrl}
                 target="_blank"
@@ -199,6 +234,41 @@ export default function ConferencePage() {
             </div>
           </div>
         </motion.div>
+
+        <section className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="plaque rounded-md p-5 md:col-span-2">
+            <p className="text-xs font-semibold uppercase tracking-wide text-un-500">Brief</p>
+            <p className="mt-2 text-sm leading-relaxed text-un-700">
+              {conference.description || 'Organizer details will appear here once the MUN team publishes them.'}
+            </p>
+            {committees.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {committees.map((committee) => (
+                  <span key={committee.name ?? committee} className="rounded-sm border border-un-800/10 px-2 py-1 text-xs font-medium text-un-600">
+                    {committee.name ?? committee}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="plaque rounded-md p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-un-500">Logistics</p>
+            <div className="mt-3 space-y-3 text-sm text-un-700">
+              <p className="flex items-start gap-2">
+                <Gavel size={15} className="mt-0.5 text-un-600" aria-hidden="true" />
+                {conference.secretariat || conference.secretary_general_name || 'Secretariat TBA'}
+              </p>
+              <p className="flex items-start gap-2">
+                <MapPin size={15} className="mt-0.5 text-un-600" aria-hidden="true" />
+                {conference.venue || conference.city || 'Venue TBA'}
+              </p>
+              <p className="flex items-start gap-2">
+                <UsersRound size={15} className="mt-0.5 text-un-600" aria-hidden="true" />
+                {conference.capacity || conference.delegate_capacity || 'Capacity TBA'} / {conference.fee || 'Fee TBA'}
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Secretary General — only shown once the organizer has set it */}
         {conference.secretary_general_name && (
@@ -224,7 +294,7 @@ export default function ConferencePage() {
         )}
 
         {/* Reviews */}
-        <section className="mt-10 space-y-4">
+        <section id="reviews" className="mt-10 scroll-mt-28 space-y-4">
           <h2 className="flex items-center gap-2 font-serif text-xl font-semibold text-un-900">
             <MessageCircle size={19} className="text-un-600" aria-hidden="true" />
             Delegate reviews

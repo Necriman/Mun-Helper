@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { animate, motion, useReducedMotion } from 'framer-motion';
-import { BookOpen, CalendarClock, Globe2, Radar } from 'lucide-react';
+import { BookOpen, CalendarClock, Globe2, Gavel, Radar } from 'lucide-react';
+import Emblem from './Emblem';
 
-/** Number that counts up on mount; renders instantly for reduced-motion users. */
 function CountUp({ to, suffix = '' }) {
   const ref = useRef(null);
   const reduceMotion = useReducedMotion();
@@ -37,10 +37,6 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
 
-/**
- * Hero: kicker, serif headline, gold rule, CTAs and four "plaque" stats.
- * `stats` = { open, upcoming, planned, guides } computed in App from real data.
- */
 export default function Hero({ stats }) {
   const tiles = [
     { icon: Globe2, label: 'Open registrations', value: stats.open },
@@ -50,7 +46,7 @@ export default function Hero({ stats }) {
   ];
 
   return (
-    <section id="top" className="relative overflow-hidden pb-16 pt-32 sm:pb-20 sm:pt-40">
+    <section id="top" className="relative overflow-hidden pb-16 pt-28 sm:pb-20 sm:pt-36">
       <div className="bg-meridians absolute inset-0" aria-hidden="true" />
 
       <motion.div
@@ -59,49 +55,42 @@ export default function Hero({ stats }) {
         animate="show"
         className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
-        {/* Kicker */}
-        <motion.div variants={item} className="flex justify-center">
-          <span className="inline-flex items-center gap-2 rounded-sm border border-gold-400/50 bg-gold-50 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-gold-700">
-            Season 2026 Registry
+        <motion.div variants={item} className="mx-auto flex max-w-4xl flex-col items-center text-center">
+          <div className="relative">
+            <Emblem size={86} />
+            <span className="absolute -bottom-1 -right-2 grid h-9 w-9 place-items-center rounded-full border border-white bg-gold-50 text-gold-700 shadow-plaque">
+              <Gavel size={18} aria-hidden="true" />
+            </span>
+          </div>
+
+          <span className="mt-5 inline-flex items-center gap-2 rounded-sm border border-un-300/70 bg-white/80 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-un-700">
+            Uzbekistan Model UN Registry
           </span>
+
+          <h1 className="mt-6 max-w-4xl font-serif text-4xl font-semibold leading-tight text-un-900 sm:text-5xl lg:text-6xl">
+            Mun Helper
+          </h1>
+          <p className="mt-4 max-w-3xl text-lg leading-relaxed text-un-700 sm:text-xl">
+            A diplomatic desk for every upcoming MUN in Uzbekistan: dates, registration links, Telegram channels,
+            secretariats, committees and delegate reviews in one place.
+          </p>
         </motion.div>
 
-        {/* Headline */}
-        <motion.h1
-          variants={item}
-          className="mx-auto mt-6 max-w-3xl text-center font-serif text-4xl font-semibold leading-tight tracking-tight text-un-900 sm:text-5xl lg:text-6xl"
-        >
-          Every Model UN conference in Uzbekistan, formally on record.
-        </motion.h1>
-
-        {/* Gold rule */}
-        <motion.div variants={item} className="mx-auto mt-6 h-px w-24 bg-gold-400" aria-hidden="true" />
-
-        <motion.p
-          variants={item}
-          className="mx-auto mt-6 max-w-2xl text-center text-base leading-relaxed text-un-700 sm:text-lg"
-        >
-          Track registrations as they open, never miss a deadline, and study the Academy's guides
-          and rules of procedure — from your first placard to chairing the dais.
-        </motion.p>
-
-        {/* CTAs */}
         <motion.div variants={item} className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#registry"
-            className="inline-flex items-center gap-2 rounded-md bg-un-800 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-un-900"
+            className="inline-flex h-12 items-center gap-2 rounded-md bg-un-800 px-6 text-sm font-semibold text-white transition-colors hover:bg-un-900"
           >
-            View the registry
+            View MUN registry
           </a>
           <a
-            href="#academy"
-            className="plaque plaque-hover inline-flex items-center gap-2 rounded-md px-6 py-3 text-sm font-semibold text-un-800"
+            href="#tools"
+            className="plaque plaque-hover inline-flex h-12 items-center gap-2 rounded-md px-6 text-sm font-semibold text-un-800"
           >
-            Explore the Academy
+            Delegate tools
           </a>
         </motion.div>
 
-        {/* Stats — formal data plaques */}
         <motion.dl variants={item} className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {tiles.map(({ icon: Icon, label, value, suffix }) => (
             <div key={label} className="plaque plaque-hover rounded-md p-4 text-center sm:p-5">

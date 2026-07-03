@@ -10,6 +10,7 @@ import { useAuth } from '../lib/auth-context';
 // from any other page, which client-side routing doesn't do out of the box.
 const LINKS = [
   { href: '/#registry', label: 'Registry' },
+  { href: '/#tools', label: 'Tools' },
   { href: '/#academy', label: 'Academy' },
   { href: '/#planned', label: 'Planned' },
 ];
@@ -36,7 +37,7 @@ export default function Navbar() {
               Mun Helper
             </span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.2em] text-un-600">
-              Uzbekistan · Est. 2026
+              Uzbekistan MUN Desk
             </span>
           </span>
         </Link>

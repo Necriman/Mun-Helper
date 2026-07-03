@@ -5,6 +5,7 @@ import FilterBar from '../components/FilterBar';
 import ConferenceGrid from '../components/ConferenceGrid';
 import PlannedSection from '../components/PlannedSection';
 import AcademySection from '../components/AcademySection';
+import DelegateTools from '../components/DelegateTools';
 import EmptyState from '../components/EmptyState';
 import Footer from '../components/Footer';
 import AdPopupModal from '../components/ads/AdPopupModal';
@@ -107,6 +108,7 @@ export default function Dashboard() {
         </section>
 
         {/* ── Pillar 2: the knowledge hub ── */}
+        <DelegateTools />
         <AcademySection />
       </main>
 

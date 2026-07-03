@@ -32,11 +32,20 @@
   .plaque-hover {
     @apply transition-colors duration-200 hover:border-gold-400/60;
   }
+
+  .seal-grid {
+    background-image:
+      radial-gradient(circle at center, rgba(255, 255, 255, 0.18) 0 1px, transparent 1px),
+      linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+    background-size: 100% 100%, 14px 14px, 14px 14px;
+  }
 }
 
 /* Faint meridian/parallel lines behind the hero — a restrained globe motif */
 .bg-meridians {
   background-image:
+    radial-gradient(circle at 50% 18%, rgba(59, 130, 196, 0.18), transparent 30%),
     repeating-linear-gradient(0deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px),
     repeating-linear-gradient(90deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px);
   -webkit-mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);

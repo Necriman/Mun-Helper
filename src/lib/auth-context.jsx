@@ -4,6 +4,13 @@ import AuthModal from '../components/auth/AuthModal';
 
 const AuthContext = createContext(null);
 
+function authRedirectTo(path = '/') {
+  if (typeof window === 'undefined') return undefined;
+  const configured = import.meta.env.VITE_SITE_URL?.replace(/\/$/, '');
+  const origin = configured || window.location.origin;
+  return `${origin}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
 /**
  * Wraps Supabase Auth (email/password) + the matching `user_profiles` row.
  * In mock mode (no .env configured) this is a no-op: session stays null,
@@ -55,8 +62,15 @@ export function AuthProvider({ children }) {
     };
   }, [session]);
 
-  const signUp = (email, password, fullName) =>
-    supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+  const signUp = (email, password, fullName, options = {}) =>
+    supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName, ...(options.data ?? {}) },
+        emailRedirectTo: options.emailRedirectTo ?? authRedirectTo('/'),
+      },
+    });
 
   const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password });
 
@@ -75,6 +89,7 @@ export function AuthProvider({ children }) {
         signIn,
         signOut,
         openAuth: setAuthModalMode,
+        authRedirectTo,
       }}
     >
       {children}

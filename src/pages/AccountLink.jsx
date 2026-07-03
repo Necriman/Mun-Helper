@@ -20,7 +20,7 @@ import { supabase } from '../lib/supabase';
 export default function AccountLink() {
   const [params] = useSearchParams();
   const token = params.get('token');
-  const { session, signIn, signUp } = useAuth();
+  const { session, signIn, signUp, authRedirectTo } = useAuth();
 
   const [tab, setTab] = useState('signin');
   const [fullName, setFullName] = useState('');
@@ -65,10 +65,9 @@ export default function AccountLink() {
 
     if (tab === 'signup') {
       // The token travels in signup metadata; handle_new_user() reads it.
-      const { error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { full_name: fullName, link_token: token } },
+      const { error: signUpError } = await signUp(email, password, fullName, {
+        data: { link_token: token },
+        emailRedirectTo: authRedirectTo(`/link?token=${encodeURIComponent(token)}`),
       });
       setBusy(false);
       if (signUpError) {

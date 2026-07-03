@@ -1,5 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Radar } from 'lucide-react';
 
 /**
@@ -27,7 +28,11 @@ const PlannedItem = forwardRef(function PlannedItem({ conference }, ref) {
         {conference.short}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-un-900">{conference.name}</p>
+        <p className="truncate text-sm font-semibold text-un-900">
+          <Link to={`/conferences/${conference.id}`} className="hover:underline">
+            {conference.name}
+          </Link>
+        </p>
         <p className="text-xs text-un-500">Date to be announced</p>
       </div>
       <button

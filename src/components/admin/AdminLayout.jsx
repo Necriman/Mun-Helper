@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, BarChart3, Megaphone, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import Emblem from '../Emblem';
 import AdminAnalytics from './AdminAnalytics';
@@ -28,7 +29,7 @@ const TABS = [
  * of a panel full of silently-failing queries. In mock mode (no Supabase
  * configured) the gate is skipped so the demo stays explorable.
  */
-export default function AdminLayout({ onBackToSite }) {
+export default function AdminLayout() {
   const [tab, setTab] = useState('analytics');
   const { isStaff, loading } = useAuth();
 
@@ -42,14 +43,13 @@ export default function AdminLayout({ onBackToSite }) {
             Your account doesn't have moderator or admin privileges. Ask an existing admin to
             promote your <code>user_profiles.role</code>.
           </p>
-          <button
-            type="button"
-            onClick={onBackToSite}
+          <Link
+            to="/"
             className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-un-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
           >
             <ArrowLeft size={15} aria-hidden="true" />
             Back to site
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -68,14 +68,13 @@ export default function AdminLayout({ onBackToSite }) {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onBackToSite}
+          <Link
+            to="/"
             className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
           >
             <ArrowLeft size={15} aria-hidden="true" />
             Back to site
-          </button>
+          </Link>
         </div>
 
         {/* Secondary tab bar */}

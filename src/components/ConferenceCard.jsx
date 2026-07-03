@@ -1,5 +1,6 @@
 import { forwardRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { BellRing, Bookmark, BookmarkCheck, CalendarDays, ExternalLink, MapPin } from 'lucide-react';
 import { STATUS } from '../data/conferences';
 import { countdownLabel, formatDateRange } from '../lib/utils';
@@ -65,7 +66,9 @@ const ConferenceCard = forwardRef(function ConferenceCard({ conference }, ref) {
       {/* Title + location */}
       <div>
         <h3 className="font-serif text-lg font-semibold leading-snug text-un-900">
-          {conference.name}
+          <Link to={`/conferences/${conference.id}`} className="hover:underline">
+            {conference.name}
+          </Link>
         </h3>
         <p className="mt-1 flex items-center gap-1.5 text-sm text-un-600">
           <MapPin size={13} aria-hidden="true" />

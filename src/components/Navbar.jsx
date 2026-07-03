@@ -1,13 +1,17 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { LogOut, Menu, Sparkles, ShieldCheck, X } from 'lucide-react';
 import Emblem from './Emblem';
 import { useAuth } from '../lib/auth-context';
 
+// Plain anchors (not react-router Links) — these jump to sections on the
+// homepage, and a full navigation reliably scrolls to a URL hash on load
+// from any other page, which client-side routing doesn't do out of the box.
 const LINKS = [
-  { href: '#registry', label: 'Registry' },
-  { href: '#academy', label: 'Academy' },
-  { href: '#planned', label: 'Planned' },
+  { href: '/#registry', label: 'Registry' },
+  { href: '/#academy', label: 'Academy' },
+  { href: '/#planned', label: 'Planned' },
 ];
 
 /**
@@ -17,15 +21,15 @@ const LINKS = [
  * `profile.role in ('moderator','admin')`; real enforcement still happens
  * server-side via the `is_staff()` RLS helper, this is just UX.
  */
-export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
+export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const { session, profile, isStaff, signOut } = useAuth();
+  const { session, profile, isStaff, signOut, openAuth } = useAuth();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-gold-400/50 bg-white/95 backdrop-blur-sm">
       <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Brand */}
-        <a href="#top" className="flex items-center gap-3" aria-label="Mun Helper home">
+        <Link to="/" className="flex items-center gap-3" aria-label="Mun Helper home">
           <Emblem size={38} />
           <span className="leading-tight">
             <span className="block font-serif text-lg font-semibold tracking-tight text-un-900">
@@ -35,7 +39,7 @@ export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
               Uzbekistan · Est. 2026
             </span>
           </span>
-        </a>
+        </Link>
 
         {/* Desktop links */}
         <div className="hidden items-center gap-1 md:flex">
@@ -53,25 +57,23 @@ export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
         {/* Auth actions */}
         <div className="hidden items-center gap-2 md:flex">
           {isStaff && (
-            <button
-              type="button"
-              onClick={onOpenAdmin}
+            <Link
+              to="/admin"
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
             >
               <ShieldCheck size={14} aria-hidden="true" />
               Admin
-            </button>
+            </Link>
           )}
 
           {session && (
-            <button
-              type="button"
-              onClick={onOpenMentor}
+            <Link
+              to="/mentor"
               className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
             >
               <Sparkles size={14} className="text-gold-500" aria-hidden="true" />
               AI Mentor
-            </button>
+            </Link>
           )}
 
           {session ? (
@@ -92,14 +94,14 @@ export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
             <>
               <button
                 type="button"
-                onClick={() => onOpenAuth('signin')}
+                onClick={() => openAuth('signin')}
                 className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
               >
                 Sign in
               </button>
               <button
                 type="button"
-                onClick={() => onOpenAuth('signup')}
+                onClick={() => openAuth('signup')}
                 className="cursor-pointer rounded-md bg-un-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
               >
                 Register delegation
@@ -142,23 +144,23 @@ export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
                 </a>
               ))}
               {isStaff && (
-                <button
-                  type="button"
-                  onClick={onOpenAdmin}
+                <Link
+                  to="/admin"
+                  onClick={() => setOpen(false)}
                   className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-medium uppercase tracking-wide text-un-700 hover:bg-un-50"
                 >
                   Admin
-                </button>
+                </Link>
               )}
               {session ? (
                 <>
-                  <button
-                    type="button"
-                    onClick={onOpenMentor}
+                  <Link
+                    to="/mentor"
+                    onClick={() => setOpen(false)}
                     className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-medium text-un-700 hover:bg-un-50"
                   >
                     AI Mentor
-                  </button>
+                  </Link>
                   <button
                     type="button"
                     onClick={signOut}
@@ -170,7 +172,7 @@ export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
               ) : (
                 <button
                   type="button"
-                  onClick={() => onOpenAuth('signup')}
+                  onClick={() => openAuth('signup')}
                   className="mt-2 w-full cursor-pointer rounded-md bg-un-800 px-4 py-2.5 text-sm font-semibold text-white"
                 >
                   Register delegation

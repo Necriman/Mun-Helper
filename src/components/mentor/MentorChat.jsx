@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { ArrowLeft, Loader2, Send, Sparkles } from 'lucide-react';
 import { useAuth } from '../../lib/auth-context';
+import Navbar from '../Navbar';
 import Emblem from '../Emblem';
 
 /**
  * AI Delegate Mentor — "Personal preparation assistant for registered users."
- * Only ever rendered when a session exists (App.jsx gates the view), calls
- * POST /api/mentor (Vercel function in prod, vite.config.js middleware in
- * dev) which forwards to Gemini server-side — the API key never reaches
+ * Reached via /mentor; since that's a directly-navigable URL now (not just a
+ * button gated by session state), this component itself checks `session`
+ * rather than relying on the Navbar link being hidden for logged-out users.
+ * Calls POST /api/mentor (Vercel function in prod, vite.config.js middleware
+ * in dev) which forwards to Gemini server-side — the API key never reaches
  * the browser.
  */
-export default function MentorChat({ onBack }) {
-  const { profile } = useAuth();
+export default function MentorChat() {
+  const { session, profile } = useAuth();
   const [messages, setMessages] = useState([
     {
       role: 'model',
@@ -50,17 +54,34 @@ export default function MentorChat({ onBack }) {
     }
   };
 
+  if (!session) {
+    return (
+      <div className="min-h-dvh">
+        <Navbar />
+        <div className="mx-auto max-w-md pt-40 text-center">
+          <Sparkles size={28} className="mx-auto text-gold-500" aria-hidden="true" />
+          <p className="mt-3 font-serif text-xl font-semibold text-un-900">Sign in required</p>
+          <p className="mt-2 text-sm text-un-600">
+            The AI Delegate Mentor is a personal assistant for registered users.
+          </p>
+          <Link to="/" className="mt-4 inline-block text-sm font-medium text-un-700 underline">
+            Back to the registry
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-dvh max-w-3xl flex-col px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={onBack}
+        <Link
+          to="/"
           className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
         >
           <ArrowLeft size={15} aria-hidden="true" />
           Back to site
-        </button>
+        </Link>
         <span className="flex items-center gap-2 font-serif text-lg font-semibold text-un-900">
           <Sparkles size={18} className="text-gold-500" aria-hidden="true" />
           AI Delegate Mentor

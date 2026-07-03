@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from './supabase';
+import AuthModal from '../components/auth/AuthModal';
 
 const AuthContext = createContext(null);
 
@@ -7,11 +8,16 @@ const AuthContext = createContext(null);
  * Wraps Supabase Auth (email/password) + the matching `user_profiles` row.
  * In mock mode (no .env configured) this is a no-op: session stays null,
  * nothing crashes, the rest of the app just behaves as a logged-out visitor.
+ *
+ * Also owns the sign-in/register modal's open state — every page reaches it
+ * via `useAuth().openAuth('signin' | 'signup')` rather than each route
+ * having to thread its own modal state through the Navbar.
  */
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(!!supabase);
+  const [authModalMode, setAuthModalMode] = useState(null); // null | 'signin' | 'signup'
 
   // Track the Supabase Auth session.
   useEffect(() => {
@@ -59,8 +65,20 @@ export function AuthProvider({ children }) {
   const isStaff = profile?.role === 'moderator' || profile?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ session, profile, loading, isStaff, signUp, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        session,
+        profile,
+        loading,
+        isStaff,
+        signUp,
+        signIn,
+        signOut,
+        openAuth: setAuthModalMode,
+      }}
+    >
       {children}
+      <AuthModal open={!!authModalMode} mode={authModalMode ?? 'signin'} onClose={() => setAuthModalMode(null)} />
     </AuthContext.Provider>
   );
 }

@@ -111,7 +111,13 @@ begin
   ) values (
     v_slug, p_title, p_short_name, p_description, p_date_start, p_date_end,
     p_contact_telegram, v_profile_id, 'pending_review',
-    case when p_date_start is not null then 'upcoming' else 'planned' end
+    -- Both CASE branches are plain string literals, so Postgres resolves the
+    -- expression's type to `text` (not `unknown`) — and `text` does NOT get
+    -- an implicit cast to a custom enum on insert, only unknown-typed
+    -- literals do. Explicit cast fixes the
+    -- 'column "registration_status" is of type registration_status but
+    -- expression is of type text' error this used to throw.
+    (case when p_date_start is not null then 'upcoming' else 'planned' end)::registration_status
   )
   returning * into v_conference;
 
@@ -151,3 +157,49 @@ begin
 end $$;
 
 grant execute on function public.bot_submit_review(bigint, uuid, smallint, text) to anon, authenticated;
+
+-- ── Conference detail fields (multi-page site: who runs it, how to reach them) ──
+alter table public.conferences add column if not exists secretary_general_name text;
+alter table public.conferences add column if not exists secretary_general_telegram text;
+
+-- ── link_telegram_by_token ───────────────────────────────────────────────────
+-- The OTHER half of account linking (the handle_new_user() trigger in
+-- schema.sql covers "brand new signup with a link_token in the metadata";
+-- this covers "I already have a website account, I just signed in, now
+-- attach my Telegram identity to it"). Called with the CALLER's own auth
+-- session (auth.uid()), not a telegram_id, since it runs from the website
+-- after a normal sign-in.
+create or replace function public.link_telegram_by_token(p_token text)
+returns boolean
+language plpgsql security definer set search_path = public as $$
+declare
+  v_token record;
+  v_caller_profile_id uuid;
+  v_bot_profile record;
+begin
+  select * into v_token from public.telegram_link_tokens
+  where token = p_token and used_at is null and expires_at > now();
+  if not found then
+    raise exception 'This link has expired or was already used.';
+  end if;
+
+  select id into v_caller_profile_id from public.user_profiles where auth_user_id = auth.uid();
+  if v_caller_profile_id is null then
+    raise exception 'No profile for the current session.';
+  end if;
+
+  select * into v_bot_profile from public.user_profiles where telegram_id = v_token.telegram_id;
+
+  if found and v_bot_profile.auth_user_id is null and v_bot_profile.id <> v_caller_profile_id then
+    -- Merge: drop the bot-only shell row, attach its telegram_id to the
+    -- caller's existing (web-authenticated) profile instead.
+    delete from public.user_profiles where id = v_bot_profile.id;
+  end if;
+
+  update public.user_profiles set telegram_id = v_token.telegram_id where id = v_caller_profile_id;
+  update public.telegram_link_tokens set used_at = now() where id = v_token.id;
+
+  return true;
+end $$;
+
+grant execute on function public.link_telegram_by_token(text) to authenticated;

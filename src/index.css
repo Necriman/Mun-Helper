@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-paper font-sans text-un-900 antialiased;
+  }
+
+  ::selection {
+    @apply bg-un-200 text-un-900;
+  }
+
+  /* Consistent, visible keyboard focus everywhere (a11y) */
+  :focus-visible {
+    @apply outline-none ring-[3px] ring-un-400 ring-offset-2 ring-offset-paper;
+  }
+}
+
+@layer components {
+  /* The one "official plaque" card recipe used across the app */
+  .plaque {
+    @apply border border-un-800/10 bg-white shadow-plaque;
+  }
+
+  .plaque-hover {
+    @apply transition-colors duration-200 hover:border-gold-400/60;
+  }
+}
+
+/* Faint meridian/parallel lines behind the hero — a restrained globe motif */
+.bg-meridians {
+  background-image:
+    repeating-linear-gradient(0deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px),
+    repeating-linear-gradient(90deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px);
+  -webkit-mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
+  mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
+}
+
+/* Thin scrollbar matching the paper canvas */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #faf8f3;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9d6e3;
+  border-radius: 8px;
+  border: 2px solid #faf8f3;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #a9bccf;
+}

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -10,17 +10,26 @@ import EmptyState from './components/EmptyState';
 import Footer from './components/Footer';
 import AdPopupModal from './components/ads/AdPopupModal';
 import AdminLayout from './components/admin/AdminLayout';
+import MentorChat from './components/mentor/MentorChat';
+import AuthModal from './components/auth/AuthModal';
+import { AuthProvider } from './lib/auth-context';
+import { supabase } from './lib/supabase';
 import { useConferences } from './hooks/useConferences';
 import { ACADEMY_TRACKS } from './data/conferences';
 import { ACTIVE_CAMPAIGN } from './data/adCampaign';
 
 /** The public-facing delegate dashboard — Pillars 1 & 2 of the ecosystem. */
-function Dashboard({ onOpenAdmin }) {
+function Dashboard({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Mock data instantly; live Supabase rows + realtime once .env is configured.
   const { conferences } = useConferences();
+
+  // One `site_visit` beacon per mount — feeds the Admin Panel's analytics.
+  useEffect(() => {
+    supabase?.from('analytics_logs').insert({ event_type: 'site_visit' }).then(() => {});
+  }, []);
 
   const normalized = query.trim().toLowerCase();
   const matchesQuery = (c) =>
@@ -63,18 +72,22 @@ function Dashboard({ onOpenAdmin }) {
     setStatusFilter('all');
   };
 
-  // Format A analytics beacon — in production this posts to
-  // `analytics_logs` (event_type: 'ad_impression' | 'ad_click').
+  // Format A analytics beacon — real insert into analytics_logs when
+  // Supabase is configured, console-logged otherwise (mock mode).
   const logAdEvent = (eventType) => {
-    // eslint-disable-next-line no-console
-    console.info(`[analytics_logs] ${eventType}`, { ad_campaign_id: ACTIVE_CAMPAIGN.id });
+    if (supabase) {
+      supabase.from('analytics_logs').insert({ event_type: eventType, ad_campaign_id: null }).then(() => {});
+    } else {
+      // eslint-disable-next-line no-console
+      console.info(`[analytics_logs] ${eventType}`, { ad_campaign_id: ACTIVE_CAMPAIGN.id });
+    }
   };
 
   return (
     <div className="min-h-dvh">
       <AdPopupModal campaign={ACTIVE_CAMPAIGN} onEvent={logAdEvent} />
 
-      <Navbar onOpenAdmin={onOpenAdmin} />
+      <Navbar onOpenAdmin={onOpenAdmin} onOpenMentor={onOpenMentor} onOpenAuth={onOpenAuth} />
       <Hero stats={stats} />
 
       <main className="mx-auto max-w-7xl space-y-16 px-4 pb-10 sm:px-6 lg:px-8">
@@ -107,19 +120,36 @@ function Dashboard({ onOpenAdmin }) {
   );
 }
 
-export default function App() {
+function Shell() {
   // No router in this showcase — a simple view switch stands in for what
-  // would be a real route (e.g. /admin) gated by role in production.
+  // would be real routes (e.g. /admin, /mentor) in production.
   const [view, setView] = useState('dashboard');
+  const [authModal, setAuthModal] = useState(null); // null | 'signin' | 'signup'
 
+  return (
+    <>
+      {view === 'admin' && <AdminLayout onBackToSite={() => setView('dashboard')} />}
+      {view === 'mentor' && <MentorChat onBack={() => setView('dashboard')} />}
+      {view === 'dashboard' && (
+        <Dashboard
+          onOpenAdmin={() => setView('admin')}
+          onOpenMentor={() => setView('mentor')}
+          onOpenAuth={setAuthModal}
+        />
+      )}
+
+      <AuthModal open={!!authModal} mode={authModal ?? 'signin'} onClose={() => setAuthModal(null)} />
+    </>
+  );
+}
+
+export default function App() {
   return (
     // reducedMotion="user" — every Framer animation respects prefers-reduced-motion.
     <MotionConfig reducedMotion="user">
-      {view === 'admin' ? (
-        <AdminLayout onBackToSite={() => setView('dashboard')} />
-      ) : (
-        <Dashboard onOpenAdmin={() => setView('admin')} />
-      )}
+      <AuthProvider>
+        <Shell />
+      </AuthProvider>
     </MotionConfig>
   );
 }

@@ -1,18 +1,54 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Check, MessagesSquare, ShieldCheck, User, X } from 'lucide-react';
 import { PENDING_APPLICATIONS } from '../../data/moderationQueue';
+import { supabase } from '../../lib/supabase';
 
 /**
- * Pending MUN Applications — bot-submitted proposals (conferences.status =
- * 'pending_review'). Approve sets status='approved'; Reject sets
- * status='rejected' + rejection_reason. Both are UPDATE statements gated by
- * the "staff moderate conferences" RLS policy in supabase/schema.sql.
+ * Pending MUN Applications — conferences.status = 'pending_review'.
+ * Approve/Reject are real UPDATE statements, allowed by the "staff moderate
+ * conferences" RLS policy (only works for a signed-in moderator/admin).
+ * Falls back to the mock PENDING_APPLICATIONS array in mock mode.
  */
 export default function AdminModeration() {
-  const [queue, setQueue] = useState(PENDING_APPLICATIONS);
+  const [queue, setQueue] = useState(supabase ? [] : PENDING_APPLICATIONS);
+  const [loading, setLoading] = useState(!!supabase);
 
-  const decide = (id) => setQueue((q) => q.filter((app) => app.id !== id));
+  useEffect(() => {
+    if (!supabase) return;
+    let cancelled = false;
+
+    supabase
+      .from('conferences')
+      .select('id, title, date_start, created_at, contact_telegram, description')
+      .eq('status', 'pending_review')
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setQueue(
+          (data ?? []).map((row) => ({
+            id: row.id,
+            title: row.title,
+            submittedBy: row.contact_telegram ?? 'Unknown',
+            submittedVia: 'Telegram bot',
+            submittedAt: new Date(row.created_at).toLocaleString(),
+            proposedDate: row.date_start ?? 'Date not yet set',
+            committees: 0,
+          })),
+        );
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const decide = async (id, nextStatus) => {
+    setQueue((q) => q.filter((app) => app.id !== id)); // optimistic
+    if (!supabase) return;
+    await supabase.from('conferences').update({ status: nextStatus }).eq('id', id);
+  };
 
   return (
     <div className="space-y-6">
@@ -20,10 +56,11 @@ export default function AdminModeration() {
         <h1 className="font-serif text-2xl font-semibold text-un-900">Moderation</h1>
         <p className="mt-1 text-sm text-un-600">
           Conferences submitted via the Telegram bot, awaiting approval before they appear publicly.
+          {loading && ' Loading…'}
         </p>
       </div>
 
-      {queue.length === 0 ? (
+      {queue.length === 0 && !loading ? (
         <div className="plaque flex flex-col items-center gap-3 rounded-md px-6 py-16 text-center">
           <ShieldCheck size={28} className="text-un-500" aria-hidden="true" />
           <p className="font-serif text-lg font-semibold text-un-900">Queue clear</p>
@@ -56,17 +93,19 @@ export default function AdminModeration() {
                     </span>
                     <span>{app.submittedAt}</span>
                     <span>Proposed: {app.proposedDate}</span>
-                    <span className="flex items-center gap-1.5">
-                      <MessagesSquare size={13} aria-hidden="true" />
-                      {app.committees} committees
-                    </span>
+                    {app.committees > 0 && (
+                      <span className="flex items-center gap-1.5">
+                        <MessagesSquare size={13} aria-hidden="true" />
+                        {app.committees} committees
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex shrink-0 gap-2">
                   <button
                     type="button"
-                    onClick={() => decide(app.id)}
+                    onClick={() => decide(app.id, 'rejected')}
                     className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-un-800/15 px-3.5 py-2 text-sm font-semibold text-un-700 transition-colors hover:border-rose-400 hover:text-rose-600"
                   >
                     <X size={15} aria-hidden="true" />
@@ -74,7 +113,7 @@ export default function AdminModeration() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => decide(app.id)}
+                    onClick={() => decide(app.id, 'approved')}
                     className="inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-un-800 px-3.5 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
                   >
                     <Check size={15} aria-hidden="true" />

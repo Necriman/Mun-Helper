@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu, ShieldCheck, X } from 'lucide-react';
+import { LogOut, Menu, Sparkles, ShieldCheck, X } from 'lucide-react';
 import Emblem from './Emblem';
+import { useAuth } from '../lib/auth-context';
 
 const LINKS = [
   { href: '#registry', label: 'Registry' },
@@ -11,13 +12,14 @@ const LINKS = [
 
 /**
  * Fixed top bar: white, formal, thin gold rule at the foot — a letterhead,
- * not a glass panel. `onOpenAdmin` is a demo-only entry point into the
- * Unified Admin & Analytics Panel — in production this link would only
- * render for `role in ('moderator','admin')` and the route itself would be
- * gated server-side via the `is_staff()` RLS helper.
+ * not a glass panel. Auth state comes from `useAuth()` (real Supabase Auth —
+ * see src/lib/auth-context.jsx). The Admin link only renders for
+ * `profile.role in ('moderator','admin')`; real enforcement still happens
+ * server-side via the `is_staff()` RLS helper, this is just UX.
  */
-export default function Navbar({ onOpenAdmin }) {
+export default function Navbar({ onOpenAdmin, onOpenMentor, onOpenAuth }) {
   const [open, setOpen] = useState(false);
+  const { session, profile, isStaff, signOut } = useAuth();
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-gold-400/50 bg-white/95 backdrop-blur-sm">
@@ -50,27 +52,60 @@ export default function Navbar({ onOpenAdmin }) {
 
         {/* Auth actions */}
         <div className="hidden items-center gap-2 md:flex">
-          <button
-            type="button"
-            onClick={onOpenAdmin}
-            className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
-            title="Staff only — demo entry point"
-          >
-            <ShieldCheck size={14} aria-hidden="true" />
-            Admin
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            className="cursor-pointer rounded-md bg-un-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
-          >
-            Register delegation
-          </button>
+          {isStaff && (
+            <button
+              type="button"
+              onClick={onOpenAdmin}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-xs font-semibold uppercase tracking-wide text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
+            >
+              <ShieldCheck size={14} aria-hidden="true" />
+              Admin
+            </button>
+          )}
+
+          {session && (
+            <button
+              type="button"
+              onClick={onOpenMentor}
+              className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
+            >
+              <Sparkles size={14} className="text-gold-500" aria-hidden="true" />
+              AI Mentor
+            </button>
+          )}
+
+          {session ? (
+            <div className="flex items-center gap-2 pl-1">
+              <span className="text-sm font-medium text-un-800">
+                {profile?.full_name || profile?.username || session.user.email}
+              </span>
+              <button
+                type="button"
+                onClick={signOut}
+                aria-label="Sign out"
+                className="grid h-9 w-9 cursor-pointer place-items-center rounded-md text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => onOpenAuth('signin')}
+                className="cursor-pointer rounded-md px-4 py-2 text-sm font-medium text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenAuth('signup')}
+                className="cursor-pointer rounded-md bg-un-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
+              >
+                Register delegation
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -106,12 +141,41 @@ export default function Navbar({ onOpenAdmin }) {
                   {link.label}
                 </a>
               ))}
-              <button
-                type="button"
-                className="mt-2 w-full cursor-pointer rounded-md bg-un-800 px-4 py-2.5 text-sm font-semibold text-white"
-              >
-                Register delegation
-              </button>
+              {isStaff && (
+                <button
+                  type="button"
+                  onClick={onOpenAdmin}
+                  className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-medium uppercase tracking-wide text-un-700 hover:bg-un-50"
+                >
+                  Admin
+                </button>
+              )}
+              {session ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={onOpenMentor}
+                    className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-medium text-un-700 hover:bg-un-50"
+                  >
+                    AI Mentor
+                  </button>
+                  <button
+                    type="button"
+                    onClick={signOut}
+                    className="mt-2 w-full cursor-pointer rounded-md border border-un-800/15 px-4 py-2.5 text-sm font-semibold text-un-700"
+                  >
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('signup')}
+                  className="mt-2 w-full cursor-pointer rounded-md bg-un-800 px-4 py-2.5 text-sm font-semibold text-white"
+                >
+                  Register delegation
+                </button>
+              )}
             </div>
           </motion.div>
         )}

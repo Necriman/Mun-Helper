@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Ban, ShieldCheck } from 'lucide-react';
 import { ADMIN_USERS } from '../../data/adminUsers';
+import { supabase } from '../../lib/supabase';
 
 const ROLE_BADGE = {
   admin: 'border-gold-400/50 bg-gold-50 text-gold-700',
@@ -9,21 +10,58 @@ const ROLE_BADGE = {
 };
 
 /**
- * User Management table — `is_banned` is a single UPDATE against
- * `user_profiles`; the RLS "staff can moderate profiles" policy is what
- * actually authorizes this in production.
+ * User Management table. Live mode reads `user_profiles` directly (public
+ * SELECT policy) and the ban toggle is a real UPDATE, authorized by the
+ * "staff can moderate profiles" RLS policy. Falls back to mock ADMIN_USERS.
  */
 export default function AdminUsers() {
-  const [users, setUsers] = useState(ADMIN_USERS);
+  const [users, setUsers] = useState(supabase ? [] : ADMIN_USERS);
+  const [loading, setLoading] = useState(!!supabase);
 
-  const toggleBan = (id) =>
-    setUsers((list) => list.map((u) => (u.id === id ? { ...u, isBanned: !u.isBanned } : u)));
+  useEffect(() => {
+    if (!supabase) return;
+    let cancelled = false;
+
+    supabase
+      .from('user_profiles')
+      .select('id, full_name, username, telegram_handle, email, role, is_banned, created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data }) => {
+        if (cancelled) return;
+        setUsers(
+          (data ?? []).map((u) => ({
+            id: u.id,
+            fullName: u.full_name || u.username,
+            handle: u.telegram_handle ? `@${u.telegram_handle}` : u.username,
+            email: u.email ?? '—',
+            role: u.role,
+            isBanned: u.is_banned,
+            joined: new Date(u.created_at).toLocaleDateString(),
+          })),
+        );
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const toggleBan = async (id) => {
+    const next = !users.find((u) => u.id === id)?.isBanned;
+    setUsers((list) => list.map((u) => (u.id === id ? { ...u, isBanned: next } : u))); // optimistic
+    if (!supabase) return;
+    await supabase.from('user_profiles').update({ is_banned: next }).eq('id', id);
+  };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-2xl font-semibold text-un-900">Users</h1>
-        <p className="mt-1 text-sm text-un-600">{users.length} accounts linked across web and Telegram.</p>
+        <p className="mt-1 text-sm text-un-600">
+          {users.length} accounts linked across web and Telegram.
+          {loading && ' Loading…'}
+        </p>
       </div>
 
       <div className="plaque overflow-hidden rounded-md">

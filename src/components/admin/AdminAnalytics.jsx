@@ -1,24 +1,73 @@
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { TrendingDown, TrendingUp } from 'lucide-react';
+import { BellRing, Eye, MessageSquareText, MousePointerClick, Send, TrendingDown, TrendingUp, Users } from 'lucide-react';
 import { ANALYTICS_WIDGETS } from '../../data/analytics';
+import { supabase } from '../../lib/supabase';
 
-const TREND_STYLE = {
-  up: 'text-un-600',
-  down: 'text-rose-600',
-  flat: 'text-gold-600',
-};
+const TREND_STYLE = { up: 'text-un-600', down: 'text-rose-600', flat: 'text-gold-600' };
 
-/** Analytics widget grid — mock stats standing in for live `analytics_logs` aggregates. */
+const ICONS = { dau: Users, reviews: MessageSquareText, ctr: MousePointerClick, 'bot-starts': Send, impressions: Eye, pending: BellRing };
+
+const todayIso = () => new Date().toISOString().slice(0, 10);
+
+/**
+ * Analytics widget grid. Live mode queries `analytics_logs` + the
+ * `ad_campaign_ctr` view directly (gated by the "staff read analytics" RLS
+ * policy — only works for a signed-in moderator/admin). Falls back to the
+ * mock ANALYTICS_WIDGETS when Supabase isn't configured.
+ */
 export default function AdminAnalytics() {
+  const [widgets, setWidgets] = useState(ANALYTICS_WIDGETS);
+  const [loading, setLoading] = useState(!!supabase);
+
+  useEffect(() => {
+    if (!supabase) return;
+
+    let cancelled = false;
+    const since = `${todayIso()}T00:00:00Z`;
+
+    (async () => {
+      const [siteVisits, reviewsToday, botStarts, impressions, pending, ctrRows] = await Promise.all([
+        supabase.from('analytics_logs').select('id', { count: 'exact', head: true }).eq('event_type', 'site_visit').gte('occurred_at', since),
+        supabase.from('reviews').select('id', { count: 'exact', head: true }).gte('created_at', since),
+        supabase.from('analytics_logs').select('id', { count: 'exact', head: true }).eq('event_type', 'bot_start').gte('occurred_at', since),
+        supabase.from('analytics_logs').select('id', { count: 'exact', head: true }).eq('event_type', 'ad_impression').gte('occurred_at', since),
+        supabase.from('conferences').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
+        supabase.from('ad_campaign_ctr').select('ctr_percent').order('impressions', { ascending: false }).limit(1),
+      ]);
+
+      if (cancelled) return;
+
+      const ctr = ctrRows.data?.[0]?.ctr_percent;
+
+      setWidgets([
+        { id: 'dau', label: 'Site Visits Today', value: (siteVisits.count ?? 0).toLocaleString(), delta: 'live', icon: ICONS.dau, trend: 'flat' },
+        { id: 'reviews', label: 'Reviews Written Today', value: String(reviewsToday.count ?? 0), delta: 'live', icon: ICONS.reviews, trend: 'flat' },
+        { id: 'ctr', label: 'Ad Banner CTR', value: ctr != null ? `${ctr}%` : '—', delta: 'live', icon: ICONS.ctr, trend: 'flat' },
+        { id: 'bot-starts', label: 'Bot Starts Today', value: String(botStarts.count ?? 0), delta: 'live', icon: ICONS['bot-starts'], trend: 'flat' },
+        { id: 'impressions', label: 'Ad Impressions Today', value: (impressions.count ?? 0).toLocaleString(), delta: 'live', icon: ICONS.impressions, trend: 'flat' },
+        { id: 'pending', label: 'Pending Approvals', value: String(pending.count ?? 0), delta: 'needs review', icon: ICONS.pending, trend: 'flat' },
+      ]);
+      setLoading(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="font-serif text-2xl font-semibold text-un-900">Analytics</h1>
-        <p className="mt-1 text-sm text-un-600">Ecosystem-wide activity across the web app and Telegram bot.</p>
+        <p className="mt-1 text-sm text-un-600">
+          {supabase ? 'Live figures from analytics_logs.' : 'Ecosystem-wide activity across the web app and Telegram bot.'}
+          {loading && ' Loading…'}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {ANALYTICS_WIDGETS.map(({ id, label, value, delta, icon: Icon, trend }, i) => (
+        {widgets.map(({ id, label, value, delta, icon: Icon, trend }, i) => (
           <motion.div
             key={id}
             initial={{ opacity: 0, y: 12 }}

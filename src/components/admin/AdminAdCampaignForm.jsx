@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ImagePlus, Megaphone } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 const PLATFORMS = [
   { id: 'bot', label: 'Bot' },
@@ -23,13 +24,31 @@ export default function AdminAdCampaignForm() {
     fileName: '',
   });
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
 
   const set = (key) => (value) => setForm((f) => ({ ...f, [key]: value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In production: supabase.from('ad_campaigns').insert({...form, status: 'paused'})
+    setError('');
+
+    if (supabase) {
+      const { error: insertError } = await supabase.from('ad_campaigns').insert({
+        title: form.title,
+        destination_url: form.destinationUrl,
+        platform: form.platform,
+        countdown_seconds: form.countdownSeconds,
+        requires_bot_subscription: form.requiresBotSubscription,
+        status: 'paused',
+      });
+      if (insertError) {
+        setError(insertError.message);
+        return;
+      }
+    }
+
     setSaved(true);
+    setForm({ title: '', destinationUrl: '', platform: 'both', countdownSeconds: 5, requiresBotSubscription: false, fileName: '' });
     setTimeout(() => setSaved(false), 2500);
   };
 
@@ -165,6 +184,8 @@ export default function AdminAdCampaignForm() {
           <Megaphone size={16} aria-hidden="true" />
           Save campaign
         </button>
+
+        {error && <p className="text-sm text-rose-600">{error}</p>}
 
         {saved && (
           <motion.p

@@ -1,0 +1,16 @@
+{
+  "name": "mun-helper-bot",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Mun Helper Telegram bot — MUN list, proposal submission, reviews, mandatory-verification gate",
+  "scripts": {
+    "start": "node index.js",
+    "broadcast": "node broadcast.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.10",
+    "dotenv": "^16.4.5",
+    "grammy": "^1.30.0"
+  }
+}

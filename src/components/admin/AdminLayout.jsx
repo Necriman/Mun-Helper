@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, BarChart3, Megaphone, ShieldCheck, Users } from 'lucide-react';
+import { ArrowLeft, BarChart3, Megaphone, ShieldAlert, ShieldCheck, Users } from 'lucide-react';
 import Emblem from '../Emblem';
 import AdminAnalytics from './AdminAnalytics';
 import AdminModeration from './AdminModeration';
 import AdminUsers from './AdminUsers';
 import AdminAdCampaignForm from './AdminAdCampaignForm';
+import { useAuth } from '../../lib/auth-context';
+import { supabase } from '../../lib/supabase';
 
 const TABS = [
   { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -19,11 +21,39 @@ const TABS = [
  * the public site's Navbar, but same design tokens for brand continuity)
  * plus a secondary tab bar switching between the four sub-views.
  *
- * In production this route would be gated server-side (RLS via `is_staff()`)
- * and client-side (redirect non-staff before this component ever mounts).
+ * Gated by `is_staff()` two ways: the RLS policies on every query/mutation
+ * in the sub-views are the REAL enforcement (a non-staff session simply
+ * gets empty results / rejected writes); this component-level check is just
+ * the UX layer so a logged-in non-staff user sees a clear message instead
+ * of a panel full of silently-failing queries. In mock mode (no Supabase
+ * configured) the gate is skipped so the demo stays explorable.
  */
 export default function AdminLayout({ onBackToSite }) {
   const [tab, setTab] = useState('analytics');
+  const { isStaff, loading } = useAuth();
+
+  if (supabase && !loading && !isStaff) {
+    return (
+      <div className="grid min-h-dvh place-items-center bg-un-50/40 px-4">
+        <div className="plaque flex max-w-sm flex-col items-center gap-3 rounded-md p-8 text-center">
+          <ShieldAlert size={28} className="text-rose-500" aria-hidden="true" />
+          <p className="font-serif text-lg font-semibold text-un-900">Staff access only</p>
+          <p className="text-sm text-un-600">
+            Your account doesn't have moderator or admin privileges. Ask an existing admin to
+            promote your <code>user_profiles.role</code>.
+          </p>
+          <button
+            type="button"
+            onClick={onBackToSite}
+            className="mt-2 inline-flex cursor-pointer items-center gap-1.5 rounded-md bg-un-800 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-900"
+          >
+            <ArrowLeft size={15} aria-hidden="true" />
+            Back to site
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-dvh bg-un-50/40">

@@ -10,7 +10,11 @@
   }
 
   body {
-    @apply bg-paper font-sans text-un-900 antialiased;
+    @apply bg-[#f6f8fb] font-sans text-un-900 antialiased;
+    background-image:
+      radial-gradient(circle at 12% 8%, rgba(76, 147, 214, 0.12), transparent 28rem),
+      radial-gradient(circle at 86% 18%, rgba(212, 175, 95, 0.12), transparent 24rem),
+      linear-gradient(180deg, #f8fbff 0%, #f6f8fb 42%, #ffffff 100%);
   }
 
   ::selection {
@@ -26,11 +30,11 @@
 @layer components {
   /* The one "official plaque" card recipe used across the app */
   .plaque {
-    @apply border border-un-800/10 bg-white shadow-plaque;
+    @apply border border-un-800/10 bg-white/90 shadow-plaque backdrop-blur;
   }
 
   .plaque-hover {
-    @apply transition-colors duration-200 hover:border-gold-400/60;
+    @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-400/60 hover:shadow-[0_18px_46px_rgba(15,51,85,0.12)];
   }
 
   .seal-grid {
@@ -39,6 +43,10 @@
       linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
     background-size: 100% 100%, 14px 14px, 14px 14px;
+  }
+
+  .glass-panel {
+    @apply border border-white/55 bg-white/70 shadow-[0_24px_70px_rgba(15,51,85,0.1)] backdrop-blur-xl;
   }
 }
 
@@ -50,6 +58,42 @@
     repeating-linear-gradient(90deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px);
   -webkit-mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
   mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
+}
+
+.hero-scanline {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 100% 72px;
+  mask-image: linear-gradient(180deg, transparent, black 18%, black 72%, transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-scanline {
+    animation: scanline-drift 12s linear infinite;
+  }
+
+  .ambient-rise {
+    animation: ambient-rise 900ms ease-out both;
+  }
+}
+
+@keyframes scanline-drift {
+  from {
+    background-position-y: 0;
+  }
+  to {
+    background-position-y: 72px;
+  }
+}
+
+@keyframes ambient-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Thin scrollbar matching the paper canvas */

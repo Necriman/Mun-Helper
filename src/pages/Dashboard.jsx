@@ -86,9 +86,9 @@ export default function Dashboard() {
       <Navbar />
       <Hero stats={stats} />
 
-      <main className="mx-auto max-w-7xl space-y-16 px-4 pb-10 sm:px-6 lg:px-8">
+      <main className="mx-auto -mt-10 max-w-7xl space-y-16 px-4 pb-12 sm:px-6 lg:px-8">
         {/* ── Pillar 1: the conference registry ── */}
-        <section id="registry" className="scroll-mt-28 space-y-6">
+        <section id="registry" className="ambient-rise scroll-mt-28 space-y-6">
           <FilterBar
             query={query}
             onQueryChange={setQuery}
@@ -108,8 +108,12 @@ export default function Dashboard() {
         </section>
 
         {/* ── Pillar 2: the knowledge hub ── */}
-        <DelegateTools />
-        <AcademySection />
+        <div className="ambient-rise">
+          <DelegateTools />
+        </div>
+        <div className="ambient-rise">
+          <AcademySection />
+        </div>
       </main>
 
       <Footer />

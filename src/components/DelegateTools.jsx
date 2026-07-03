@@ -1,4 +1,5 @@
 import { BellRing, Bot, ClipboardCheck, MessageCircle, Send, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const TOOLS = [
   {
@@ -49,18 +50,28 @@ export default function DelegateTools() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {TOOLS.map(({ icon: Icon, title, body, action, href }) => (
-          <a key={title} href={href} className="plaque plaque-hover group flex min-h-56 flex-col rounded-md p-5">
-            <span className="grid h-11 w-11 place-items-center rounded-sm bg-un-50 text-un-700">
+        {TOOLS.map(({ icon: Icon, title, body, action, href }, index) => (
+          <motion.a
+            key={title}
+            href={href}
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ y: -7, scale: 1.01 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ delay: index * 0.05, type: 'spring', stiffness: 260, damping: 24 }}
+            className="plaque plaque-hover group relative flex min-h-56 flex-col overflow-hidden rounded-xl p-5"
+          >
+            <span className="absolute right-4 top-4 h-16 w-16 rounded-full bg-un-100/40 blur-2xl transition-opacity group-hover:opacity-100" aria-hidden="true" />
+            <span className="grid h-11 w-11 place-items-center rounded-lg bg-un-50 text-un-700 shadow-inner">
               <Icon size={20} aria-hidden="true" />
             </span>
             <h3 className="mt-4 font-serif text-lg font-semibold text-un-900">{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-un-600">{body}</p>
             <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-un-700">
               {action}
-              <Send size={14} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              <Send size={14} className="transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true" />
             </span>
-          </a>
+          </motion.a>
         ))}
       </div>
     </section>

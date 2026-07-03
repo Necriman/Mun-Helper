@@ -9,6 +9,7 @@ import 'dotenv/config';
 import { Bot, InlineKeyboard, Keyboard, session } from 'grammy';
 import { createClient } from '@supabase/supabase-js';
 import { CONFERENCES } from '../src/data/conferences.js';
+import { MATERIAL_CATEGORIES, PREP_MATERIALS } from '../src/data/prepMaterials.js';
 
 const { TELEGRAM_BOT_TOKEN, SUPABASE_URL, SUPABASE_ANON_KEY, SITE_URL } = process.env;
 
@@ -28,9 +29,11 @@ bot.use(session({ initial: () => ({ step: null, draft: {} }) }));
 
 const MAIN_MENU = new Keyboard()
   .text('View MUN list')
-  .text('Submit a MUN')
+  .text('Preparation materials')
   .row()
+  .text('Submit a MUN')
   .text('Leave a review')
+  .row()
   .text('Link my account')
   .resized();
 
@@ -52,6 +55,10 @@ function formatDateRange(start, end) {
 
 function siteConferenceUrl(slug) {
   return publicSiteUrl ? `${publicSiteUrl}/conferences/${slug}` : null;
+}
+
+function siteAcademyUrl() {
+  return publicSiteUrl ? `${publicSiteUrl}/#academy` : null;
 }
 
 function mapRow(row) {
@@ -146,6 +153,54 @@ function conferenceText(conference) {
   ].join('\n');
 }
 
+function materialCategoryKeyboard() {
+  const keyboard = new InlineKeyboard();
+  MATERIAL_CATEGORIES.filter((category) => category.id !== 'all').forEach((category, index) => {
+    keyboard.text(category.label, `prep:cat:${category.id}`);
+    if (index % 2 === 1) keyboard.row();
+  });
+  const academyUrl = siteAcademyUrl();
+  if (academyUrl) keyboard.row().url('Open full Academy on site', academyUrl);
+  return keyboard;
+}
+
+function materialListKeyboard(categoryId) {
+  const keyboard = new InlineKeyboard();
+  const materials = PREP_MATERIALS.filter((material) => material.category === categoryId).slice(0, 12);
+  materials.forEach((material) => keyboard.text(material.title.slice(0, 58), `prep:item:${material.id}`).row());
+  keyboard.text('Back to categories', 'prep:list');
+  return keyboard;
+}
+
+function materialKeyboard(material) {
+  const keyboard = new InlineKeyboard().url('Open material', material.url);
+  const academyUrl = siteAcademyUrl();
+  if (academyUrl) keyboard.url('Academy', academyUrl);
+  keyboard.row().text('Back to materials', `prep:cat:${material.category}`);
+  return keyboard;
+}
+
+function materialText(material) {
+  return [
+    `${material.title}`,
+    `${material.type} / ${material.language} / ${material.level}`,
+    `Time: ${material.time}`,
+    '',
+    material.summary,
+  ].join('\n');
+}
+
+async function sendMaterialCategories(ctx, edit = false) {
+  const text = [
+    'Preparation materials',
+    '',
+    'Choose what you want to train: basics, research, position papers, resolutions, committees, or videos.',
+  ].join('\n');
+  const reply_markup = materialCategoryKeyboard();
+  if (edit) await ctx.editMessageText(text, { reply_markup });
+  else await ctx.reply(text, { reply_markup });
+}
+
 async function sendMunList(ctx, edit = false) {
   const conferences = await loadConferences();
   if (!conferences.length) {
@@ -179,7 +234,11 @@ bot.command('start', async (ctx) => {
 
   ctx.session.step = null;
   await ctx.reply(
-    "Welcome to Mun Helper, Uzbekistan's Model UN registry.\n\nUse the menu below to browse MUNs, submit a new one, or leave a review.",
+    [
+      "Welcome to Mun Helper, Uzbekistan's Model UN delegate desk.",
+      '',
+      'Browse upcoming MUNs, open registration links, read reviews, and train with preparation materials before committee.',
+    ].join('\n'),
     { reply_markup: MAIN_MENU },
   );
 });
@@ -187,6 +246,45 @@ bot.command('start', async (ctx) => {
 bot.hears(/^(?:📋\s*)?View MUN list$/, async (ctx) => {
   ctx.session.step = null;
   await sendMunList(ctx);
+});
+
+bot.hears(/^Preparation materials$/, async (ctx) => {
+  ctx.session.step = null;
+  await sendMaterialCategories(ctx);
+});
+
+bot.callbackQuery('prep:list', async (ctx) => {
+  await ctx.answerCallbackQuery();
+  await sendMaterialCategories(ctx, true);
+});
+
+bot.callbackQuery(/^prep:cat:(.+)$/, async (ctx) => {
+  const categoryId = ctx.match[1];
+  const category = MATERIAL_CATEGORIES.find((item) => item.id === categoryId);
+  await ctx.answerCallbackQuery();
+
+  if (!category) {
+    await ctx.editMessageText('This category is not available anymore. Please refresh the list.');
+    return;
+  }
+
+  const count = PREP_MATERIALS.filter((material) => material.category === categoryId).length;
+  await ctx.editMessageText(`${category.label}\n\nChoose one of ${count} materials:`, {
+    reply_markup: materialListKeyboard(categoryId),
+  });
+});
+
+bot.callbackQuery(/^prep:item:(.+)$/, async (ctx) => {
+  const materialId = ctx.match[1];
+  const material = PREP_MATERIALS.find((item) => item.id === materialId);
+  await ctx.answerCallbackQuery();
+
+  if (!material) {
+    await ctx.editMessageText('This material is not available anymore. Please refresh the list.');
+    return;
+  }
+
+  await ctx.editMessageText(materialText(material), { reply_markup: materialKeyboard(material) });
 });
 
 bot.callbackQuery('mun:list', async (ctx) => {

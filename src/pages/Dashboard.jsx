@@ -10,7 +10,7 @@ import EmptyState from '../components/EmptyState';
 import Footer from '../components/Footer';
 import AdPopupModal from '../components/ads/AdPopupModal';
 import { useConferences } from '../hooks/useConferences';
-import { ACADEMY_TRACKS } from '../data/conferences';
+import { PREP_MATERIALS } from '../data/prepMaterials';
 import { ACTIVE_CAMPAIGN } from '../data/adCampaign';
 import { supabase } from '../lib/supabase';
 
@@ -55,7 +55,7 @@ export default function Dashboard() {
         open: dated.filter((c) => c.status === 'open').length,
         upcoming: dated.filter((c) => c.status === 'upcoming').length,
         planned: planned.length,
-        guides: ACADEMY_TRACKS.reduce((sum, t) => sum + t.guides, 0),
+        guides: PREP_MATERIALS.length,
       },
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

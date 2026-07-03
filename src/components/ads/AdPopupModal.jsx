@@ -73,7 +73,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-un-900/70 p-4"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-un-900/45 p-4 backdrop-blur-[2px] md:items-center md:justify-end md:p-8"
           role="dialog"
           aria-modal="true"
           aria-labelledby="ad-modal-title"
@@ -85,7 +85,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="relative w-full max-w-md overflow-hidden rounded-md border border-gold-400/50 bg-white shadow-plaque"
+            className="relative w-full max-w-sm overflow-hidden rounded-md border border-gold-400/50 bg-white shadow-plaque"
           >
             {/* Close button — disabled + counting down until canClose */}
             <button
@@ -103,7 +103,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
             </button>
 
             {/* Sponsor banner area */}
-            <div className="flex h-36 items-center justify-center bg-gradient-to-br from-un-800 to-un-900">
+            <div className="flex h-28 items-center justify-center bg-gradient-to-br from-un-800 to-un-900">
               {campaign.imageUrl ? (
                 <img
                   src={campaign.imageUrl}
@@ -115,11 +115,11 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
               )}
             </div>
 
-            <div className="p-6">
+            <div className="p-5">
               <span className="inline-flex items-center gap-1.5 rounded-sm border border-gold-400/50 bg-gold-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-700">
                 Featured conference
               </span>
-              <h2 id="ad-modal-title" className="mt-3 font-serif text-2xl font-semibold text-un-900">
+              <h2 id="ad-modal-title" className="mt-3 font-serif text-xl font-semibold text-un-900">
                 {campaign.title}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-un-700">{campaign.tagline}</p>

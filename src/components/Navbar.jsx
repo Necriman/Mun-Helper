@@ -11,7 +11,7 @@ import { useAuth } from '../lib/auth-context';
 const LINKS = [
   { href: '/#registry', label: 'Registry' },
   { href: '/#tools', label: 'Tools' },
-  { href: '/#academy', label: 'Academy' },
+  { href: '/#academy', label: 'Prep' },
   { href: '/#planned', label: 'Planned' },
 ];
 

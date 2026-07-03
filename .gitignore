@@ -9,3 +9,4 @@ dist
 .claude/
 __pycache__/
 *.pyc
+bot/data/reminders-sent.json

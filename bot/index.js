@@ -6,24 +6,45 @@
  * Account linking remains available, but browsing the list is no longer gated.
  */
 import 'dotenv/config';
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { Bot, InlineKeyboard, Keyboard, session } from 'grammy';
 import { createClient } from '@supabase/supabase-js';
 import { CONFERENCES } from '../src/data/conferences.js';
 import { MATERIAL_CATEGORIES, PREP_MATERIALS } from '../src/data/prepMaterials.js';
 
-const { TELEGRAM_BOT_TOKEN, SUPABASE_URL, SUPABASE_ANON_KEY, SITE_URL } = process.env;
+const {
+  TELEGRAM_BOT_TOKEN,
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  VITE_SUPABASE_URL,
+  VITE_SUPABASE_ANON_KEY,
+  SITE_URL,
+  VITE_SITE_URL,
+} = process.env;
+
+const supabaseUrl = SUPABASE_URL || VITE_SUPABASE_URL;
+const supabaseAnonKey = SUPABASE_ANON_KEY || VITE_SUPABASE_ANON_KEY;
 
 if (!TELEGRAM_BOT_TOKEN) throw new Error('TELEGRAM_BOT_TOKEN is required (see .env.example)');
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL / SUPABASE_ANON_KEY are required');
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('SUPABASE_URL / SUPABASE_ANON_KEY are required (VITE_ aliases are also accepted)');
+}
 
-const publicSiteUrl = SITE_URL && !SITE_URL.includes('localhost') ? SITE_URL.replace(/\/$/, '') : null;
+const configuredSiteUrl = SITE_URL || VITE_SITE_URL;
+const publicSiteUrl =
+  configuredSiteUrl && !configuredSiteUrl.includes('localhost') ? configuredSiteUrl.replace(/\/$/, '') : null;
 
 if (!publicSiteUrl) {
   console.warn('SITE_URL is unset or local. Bot web links will point to the configured fallback only.');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const bot = new Bot(TELEGRAM_BOT_TOKEN);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const REMINDER_STATE_FILE = path.join(__dirname, 'data', 'reminders-sent.json');
+const ONE_DAY_MS = 86_400_000;
 
 bot.use(session({ initial: () => ({ step: null, draft: {} }) }));
 
@@ -51,6 +72,14 @@ function formatDate(iso) {
 function formatDateRange(start, end) {
   if (!start) return 'Date TBA';
   return end ? `${formatDate(start)} - ${formatDate(end)}` : formatDate(start);
+}
+
+function daysUntilDate(iso) {
+  if (!iso) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(`${iso}T00:00:00`);
+  return Math.round((target - today) / ONE_DAY_MS);
 }
 
 function siteConferenceUrl(slug) {
@@ -115,6 +144,108 @@ async function loadConferences() {
 
   if (!error && data?.length) return data.map(mapRow);
   return CONFERENCES.map(mapMock);
+}
+
+async function loadTelegramRecipients() {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('telegram_id')
+    .not('telegram_id', 'is', null)
+    .eq('is_banned', false);
+
+  const state = await readReminderState();
+  const localSubscribers = state.subscribers ?? [];
+
+  if (error) {
+    console.error('[reminders] could not load recipients:', error.message);
+    return localSubscribers;
+  }
+
+  return [
+    ...new Set([
+      ...(data ?? []).map((row) => row.telegram_id).filter(Boolean),
+      ...localSubscribers,
+    ]),
+  ];
+}
+
+async function readReminderState() {
+  try {
+    const raw = await fs.readFile(REMINDER_STATE_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return { sent: {}, subscribers: [] };
+  }
+}
+
+async function writeReminderState(state) {
+  await fs.mkdir(path.dirname(REMINDER_STATE_FILE), { recursive: true });
+  await fs.writeFile(REMINDER_STATE_FILE, JSON.stringify(state, null, 2));
+}
+
+async function rememberSubscriber(telegramId) {
+  const state = await readReminderState();
+  const subscribers = new Set((state.subscribers ?? []).map(String));
+  subscribers.add(String(telegramId));
+  state.subscribers = [...subscribers];
+  state.sent ??= {};
+  await writeReminderState(state);
+}
+
+function reminderText(conference) {
+  const pageUrl = siteConferenceUrl(conference.slug);
+  return [
+    `One week left until ${conference.title}`,
+    '',
+    `Date: ${formatDateRange(conference.dateStart, conference.dateEnd)}`,
+    `City: ${conference.city ?? 'Tashkent'}`,
+    conference.registrationLink ? `Registration: ${conference.registrationLink}` : null,
+    pageUrl ? `Details: ${pageUrl}` : null,
+    '',
+    'Use "View MUN list" to check all upcoming MUNs.',
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
+async function sendOneWeekReminders() {
+  const conferences = await loadConferences();
+  const dueConferences = conferences.filter((conference) => daysUntilDate(conference.dateStart) === 7);
+  if (!dueConferences.length) return;
+
+  const recipients = await loadTelegramRecipients();
+  if (!recipients.length) return;
+
+  const state = await readReminderState();
+  let changed = false;
+
+  for (const conference of dueConferences) {
+    const key = `${conference.slug}:${conference.dateStart}:week`;
+    const sentTo = new Set(state.sent[key] ?? []);
+    const text = reminderText(conference);
+
+    for (const telegramId of recipients) {
+      if (sentTo.has(String(telegramId))) continue;
+      try {
+        await bot.api.sendMessage(telegramId, text);
+        sentTo.add(String(telegramId));
+        changed = true;
+      } catch (err) {
+        const message = err?.description ?? err?.message ?? String(err);
+        console.warn(`[reminders] failed for ${telegramId}: ${message}`);
+      }
+    }
+
+    state.sent[key] = [...sentTo];
+  }
+
+  if (changed) await writeReminderState(state);
+}
+
+function startReminderScheduler() {
+  const run = () => sendOneWeekReminders().catch((err) => console.error('[reminders]', err));
+  setTimeout(run, 15_000);
+  setInterval(run, 6 * 60 * 60 * 1000);
 }
 
 function listKeyboard(conferences) {
@@ -203,13 +334,14 @@ async function sendMaterialCategories(ctx, edit = false) {
 
 async function sendMunList(ctx, edit = false) {
   const conferences = await loadConferences();
-  if (!conferences.length) {
+  const visibleConferences = conferences.filter((conference) => conference.status !== 'planned' || !conference.dateStart);
+  if (!visibleConferences.length) {
     await ctx.reply('No conferences on record right now. Check back soon.');
     return;
   }
 
-  const text = 'Choose a MUN to see registration, Telegram channel and reviews:';
-  const reply_markup = listKeyboard(conferences);
+  const text = 'Upcoming MUNs are public. Choose a MUN to see registration, Telegram channel and reviews:';
+  const reply_markup = listKeyboard(visibleConferences);
   if (edit) await ctx.editMessageText(text, { reply_markup });
   else await ctx.reply(text, { reply_markup });
 }
@@ -226,11 +358,16 @@ async function sendLinkPrompt(ctx, telegramId) {
 
 bot.command('start', async (ctx) => {
   const telegramId = ctx.from.id;
-  await supabase.rpc('bot_upsert_profile', {
+  await rememberSubscriber(telegramId);
+
+  const { error: profileError } = await supabase.rpc('bot_upsert_profile', {
     p_telegram_id: telegramId,
     p_telegram_handle: ctx.from.username ?? null,
   });
-  await supabase.from('analytics_logs').insert({ event_type: 'bot_start' });
+  if (profileError) console.warn('[start] profile upsert failed:', profileError.message);
+
+  const { error: analyticsError } = await supabase.from('analytics_logs').insert({ event_type: 'bot_start' });
+  if (analyticsError) console.warn('[start] analytics insert failed:', analyticsError.message);
 
   ctx.session.step = null;
   await ctx.reply(
@@ -243,12 +380,22 @@ bot.command('start', async (ctx) => {
   );
 });
 
-bot.hears(/^(?:📋\s*)?View MUN list$/, async (ctx) => {
+bot.command('muns', async (ctx) => {
   ctx.session.step = null;
   await sendMunList(ctx);
 });
 
-bot.hears(/^Preparation materials$/, async (ctx) => {
+bot.command('materials', async (ctx) => {
+  ctx.session.step = null;
+  await sendMaterialCategories(ctx);
+});
+
+bot.hears(/^(?:📋\s*)?(View MUN list|Список MUN|Предстоящие MUN|Муны)$/i, async (ctx) => {
+  ctx.session.step = null;
+  await sendMunList(ctx);
+});
+
+bot.hears(/^(Preparation materials|Материалы|Подготовка)$/i, async (ctx) => {
   ctx.session.step = null;
   await sendMaterialCategories(ctx);
 });
@@ -306,13 +453,13 @@ bot.callbackQuery(/^mun:(?!list$)(.+)$/, async (ctx) => {
   await ctx.editMessageText(conferenceText(conference), { reply_markup: conferenceKeyboard(conference) });
 });
 
-bot.hears(/^(?:✍️\s*)?Submit a MUN$/, async (ctx) => {
+bot.hears(/^(?:✍️\s*)?(Submit a MUN|Добавить MUN)$/i, async (ctx) => {
   ctx.session.step = 'submit_title';
   ctx.session.draft = {};
   await ctx.reply('What is the conference called? Example: RVSU MUN');
 });
 
-bot.hears(/^(?:⭐\s*)?Leave a review$/, async (ctx) => {
+bot.hears(/^(?:⭐\s*)?(Leave a review|Оставить отзыв)$/i, async (ctx) => {
   const conferences = await loadConferences();
   if (!conferences.length) {
     await ctx.reply('No conferences available to review yet.');
@@ -357,7 +504,7 @@ bot.callbackQuery(/^review_rate:(\d)$/, async (ctx) => {
   await ctx.reply('Add a short comment, or send "-" to skip:');
 });
 
-bot.hears(/^(?:🔗\s*)?Link my account$/, async (ctx) => {
+bot.hears(/^(?:🔗\s*)?(Link my account|Привязать аккаунт)$/i, async (ctx) => {
   await sendLinkPrompt(ctx, ctx.from.id);
 });
 
@@ -425,5 +572,6 @@ bot.on('message:text', async (ctx) => {
 
 bot.catch((err) => console.error('[bot error]', err.error ?? err));
 
+startReminderScheduler();
 bot.start();
 console.log('Mun Helper bot is running.');

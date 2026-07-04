@@ -12,6 +12,8 @@
   body {
     @apply bg-[#f8fafc] font-sans text-un-900 antialiased;
     background-image:
+      radial-gradient(circle at 18% 8%, rgba(91, 146, 229, 0.14), transparent 28rem),
+      radial-gradient(circle at 86% 18%, rgba(0, 158, 219, 0.1), transparent 24rem),
       linear-gradient(180deg, #ffffff 0%, #f8fafc 44%, #ffffff 100%);
   }
 
@@ -46,6 +48,18 @@
   .glass-panel {
     @apply border border-slate-200 bg-white shadow-plaque;
   }
+
+  .tech-card {
+    @apply border border-un-200/80 bg-white/90 shadow-[0_24px_70px_rgba(11,31,58,0.08)] backdrop-blur;
+  }
+}
+
+.tech-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    radial-gradient(circle at 50% 35%, rgba(91, 146, 229, 0.22), transparent 34rem);
+  background-size: 56px 56px, 56px 56px, 100% 100%;
 }
 
 /* Faint meridian/parallel lines behind the hero — a restrained globe motif */

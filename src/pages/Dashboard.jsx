@@ -9,6 +9,7 @@ import Leaderboard from '../components/Leaderboard';
 import DelegateTools from '../components/DelegateTools';
 import InstitutionalBriefing from '../components/InstitutionalBriefing';
 import ReadinessPanel from '../components/ReadinessPanel';
+import CommandDeck from '../components/CommandDeck';
 import EmptyState from '../components/EmptyState';
 import Footer from '../components/Footer';
 import AdPopupModal from '../components/ads/AdPopupModal';
@@ -94,6 +95,10 @@ export default function Dashboard() {
       <Hero stats={stats} />
 
       <main className="mx-auto -mt-10 max-w-7xl space-y-16 px-4 pb-12 sm:px-6 lg:px-8">
+        <Reveal>
+          <CommandDeck stats={stats} />
+        </Reveal>
+
         {/* ── Pillar 1: the conference registry ── */}
         {/* Reveal = scroll-triggered; the old `ambient-rise` CSS animated on
             page load, so below-the-fold sections finished invisibly. */}

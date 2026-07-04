@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import ConferencePage from './pages/ConferencePage';
 import AccountLink from './pages/AccountLink';
+import LevelTest from './pages/LevelTest';
 import AdminLayout from './components/admin/AdminLayout';
 import MentorChat from './components/mentor/MentorChat';
 import { AuthProvider } from './lib/auth-context';
@@ -17,6 +18,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/conferences/:slug" element={<ConferencePage />} />
+            <Route path="/test" element={<LevelTest />} />
             <Route path="/link" element={<AccountLink />} />
             <Route path="/admin" element={<AdminLayout />} />
             <Route path="/mentor" element={<MentorChat />} />

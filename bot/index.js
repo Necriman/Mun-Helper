@@ -55,6 +55,7 @@ const MAIN_MENU = new Keyboard()
   .text('Submit a MUN')
   .text('Leave a review')
   .row()
+  .text('Top delegates')
   .text('Link my account')
   .resized();
 
@@ -524,6 +525,34 @@ bot.callbackQuery(/^review_rate:(\d)$/, async (ctx) => {
 
 bot.hears(/^(?:🔗\s*)?(Link my account|Привязать аккаунт)$/i, async (ctx) => {
   await sendLinkPrompt(ctx, ctx.from.id);
+});
+
+// ── Leaderboard: top delegates by XP (reviews + level test on the site) ────
+bot.hears(/^(?:🏆\s*)?(Top delegates|Топ делегатов|Лидеры)$/i, async (ctx) => {
+  ctx.session.step = null;
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .select('display_name, level, xp')
+    .limit(10);
+
+  if (error) {
+    await ctx.reply(`Could not load the leaderboard: ${error.message}`);
+    return;
+  }
+  if (!data?.length) {
+    await ctx.reply(
+      'The leaderboard is empty so far. Earn XP by reviewing conferences and passing the delegate level test on the website.',
+    );
+    return;
+  }
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const lines = data.map(
+    (row, index) =>
+      `${medals[index] ?? `${index + 1}.`} ${row.display_name} — ${Number(row.xp).toLocaleString()} XP (${row.level})`,
+  );
+
+  await ctx.reply(['Top delegates of the season:', '', ...lines].join('\n'));
 });
 
 bot.on('message:text', async (ctx) => {

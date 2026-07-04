@@ -5,6 +5,7 @@ import FilterBar from '../components/FilterBar';
 import ConferenceGrid from '../components/ConferenceGrid';
 import PlannedSection from '../components/PlannedSection';
 import AcademySection from '../components/AcademySection';
+import Leaderboard from '../components/Leaderboard';
 import DelegateTools from '../components/DelegateTools';
 import InstitutionalBriefing from '../components/InstitutionalBriefing';
 import ReadinessPanel from '../components/ReadinessPanel';
@@ -124,6 +125,10 @@ export default function Dashboard() {
 
         <Reveal>
           <ReadinessPanel />
+        </Reveal>
+
+        <Reveal>
+          <Leaderboard />
         </Reveal>
 
         <Reveal>

@@ -85,9 +85,8 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/70 bg-white/95 shadow-[0_24px_70px_rgba(3,16,29,0.3)] backdrop-blur-xl"
+            className="relative w-full max-w-sm overflow-hidden rounded-sm border border-white/70 bg-white shadow-[0_24px_70px_rgba(3,16,29,0.3)]"
           >
-            <div className="pointer-events-none absolute -right-14 -top-14 h-36 w-36 rounded-full bg-gold-200/55 blur-3xl" aria-hidden="true" />
             {/* Close button — disabled + counting down until canClose */}
             <button
               type="button"
@@ -96,7 +95,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
               aria-label={canClose ? 'Close advertisement' : `Close available in ${secondsLeft}s`}
               className={`absolute right-3 top-3 z-10 grid h-9 w-9 place-items-center rounded-full text-sm font-semibold transition-colors ${
                 canClose
-                  ? 'cursor-pointer bg-white/80 text-un-800 shadow-sm hover:bg-un-900/10'
+                  ? 'cursor-pointer bg-white text-un-800 shadow-sm hover:bg-un-900/10'
                   : 'cursor-not-allowed bg-un-900/5 text-un-500 tabular-nums'
               }`}
             >
@@ -104,8 +103,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
             </button>
 
             {/* Sponsor banner area */}
-            <div className="relative flex h-32 items-center justify-center overflow-hidden bg-gradient-to-br from-[#061525] via-un-900 to-[#123e64]">
-              <div className="absolute inset-0 hero-scanline opacity-35" aria-hidden="true" />
+            <div className="relative flex h-32 items-center justify-center overflow-hidden bg-un-900">
               {campaign.imageUrl ? (
                 <img
                   src={campaign.imageUrl}
@@ -118,10 +116,10 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
             </div>
 
             <div className="p-5">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-gold-400/50 bg-gold-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-gold-700">
+              <span className="inline-flex items-center gap-1.5 rounded-sm border border-un-200 bg-un-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-un-700">
                 Featured conference
               </span>
-              <h2 id="ad-modal-title" className="mt-3 font-serif text-xl font-semibold text-un-900">
+              <h2 id="ad-modal-title" className="mt-3 text-xl font-bold text-un-900">
                 {campaign.title}
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-un-700">{campaign.tagline}</p>
@@ -129,7 +127,7 @@ export default function AdPopupModal({ campaign, onEvent = () => {} }) {
               <button
                 type="button"
                 onClick={handleCta}
-                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-un-900 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(15,51,85,0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-800"
+                className="mt-5 flex h-11 w-full items-center justify-center gap-2 rounded-sm bg-un-900 text-sm font-semibold text-white transition-colors hover:bg-un-800"
               >
                 Learn more
                 <ExternalLink size={15} aria-hidden="true" />

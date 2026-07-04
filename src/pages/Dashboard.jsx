@@ -6,6 +6,7 @@ import ConferenceGrid from '../components/ConferenceGrid';
 import PlannedSection from '../components/PlannedSection';
 import AcademySection from '../components/AcademySection';
 import DelegateTools from '../components/DelegateTools';
+import InstitutionalBriefing from '../components/InstitutionalBriefing';
 import EmptyState from '../components/EmptyState';
 import Footer from '../components/Footer';
 import AdPopupModal from '../components/ads/AdPopupModal';
@@ -108,6 +109,10 @@ export default function Dashboard() {
         </section>
 
         {/* ── Pillar 2: the knowledge hub ── */}
+        <div className="ambient-rise">
+          <InstitutionalBriefing stats={stats} />
+        </div>
+
         <div className="ambient-rise">
           <DelegateTools />
         </div>

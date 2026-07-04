@@ -19,10 +19,10 @@ const PlannedItem = forwardRef(function PlannedItem({ conference }, ref) {
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.25, ease: 'easeOut' }}
       whileHover={{ y: -4 }}
-      className="plaque plaque-hover flex items-center gap-3 rounded-xl p-3.5"
+      className="plaque plaque-hover flex items-center gap-3 rounded-sm p-3.5"
     >
       <span
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-lg font-serif text-xs font-bold text-white shadow-[0_10px_22px_rgba(15,51,85,0.16)]"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-sm text-xs font-bold text-white"
         style={{ backgroundColor: conference.color }}
         aria-hidden="true"
       >
@@ -41,7 +41,7 @@ const PlannedItem = forwardRef(function PlannedItem({ conference }, ref) {
         onClick={() => setWatching((v) => !v)}
         aria-pressed={watching}
         aria-label={watching ? `Stop watching ${conference.name}` : `Watch ${conference.name}`}
-        className={`grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-lg border transition-colors ${
+        className={`grid h-11 w-11 shrink-0 cursor-pointer place-items-center rounded-sm border transition-colors ${
           watching
             ? 'border-gold-400 bg-gold-50 text-gold-700'
             : 'border-un-800/15 text-un-500 hover:border-un-400 hover:text-un-800'
@@ -61,10 +61,10 @@ export default function PlannedSection({ conferences }) {
     <section id="planned" className="scroll-mt-28">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-2.5 font-serif text-xl font-semibold text-un-900 sm:text-2xl">
+          <h2 className="flex items-center gap-2.5 text-xl font-bold text-un-900 sm:text-2xl">
             <Radar size={20} className="text-un-600" aria-hidden="true" />
             Planned conferences
-            <span className="rounded-full bg-un-50 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-un-700">
+            <span className="rounded-sm bg-un-50 px-2.5 py-0.5 text-xs font-semibold tabular-nums text-un-700">
               {conferences.length}
             </span>
           </h2>

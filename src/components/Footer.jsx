@@ -4,7 +4,7 @@ import Emblem from './Emblem';
 /** Formal footer: brand, tagline, community link, and a thin Uzbekistan-flag accent rule. */
 export default function Footer() {
   return (
-    <footer className="mt-20 border-t border-un-800/10 bg-white/55 backdrop-blur">
+    <footer className="mt-20 border-t border-slate-200 bg-white">
       {/* Thin tricolor rule referencing the Uzbekistan flag */}
       <div className="h-1 w-full bg-un-500" aria-hidden="true">
         <div className="h-full w-full bg-gradient-to-r from-un-500 via-white/40 to-green-600/70" />
@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <Emblem size={32} />
           <div>
-            <p className="font-serif text-sm font-semibold text-un-900">Mun Helper</p>
+            <p className="text-sm font-bold text-un-900">Mun Helper</p>
             <p className="text-xs text-un-500">The registry for Uzbekistan&apos;s MUN community.</p>
           </div>
         </div>
@@ -23,7 +23,7 @@ export default function Footer() {
           href="https://t.me"
           target="_blank"
           rel="noreferrer"
-          className="plaque plaque-hover inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-un-700"
+          className="plaque plaque-hover inline-flex min-h-11 items-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold text-un-700"
         >
           <Send size={15} className="text-un-600" aria-hidden="true" />
           Join the Telegram community

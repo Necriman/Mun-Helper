@@ -41,7 +41,7 @@ export default function DelegateTools() {
             <ShieldCheck size={15} aria-hidden="true" />
             Delegate operations desk
           </p>
-          <h2 className="mt-2 font-serif text-2xl font-semibold text-un-900">Everything around the MUN list</h2>
+          <h2 className="mt-2 text-2xl font-bold text-un-900">Services around the public registry</h2>
         </div>
         <p className="max-w-xl text-sm leading-relaxed text-un-600">
           Built for quick decisions: check dates, inspect organizers, compare channels, read reviews and move to
@@ -56,16 +56,16 @@ export default function DelegateTools() {
             href={href}
             initial={{ opacity: 0, y: 18 }}
             whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -7, scale: 1.01 }}
+            whileHover={{ y: -4 }}
             viewport={{ once: true, margin: '-40px' }}
-            transition={{ delay: index * 0.05, type: 'spring', stiffness: 260, damping: 24 }}
-            className="plaque plaque-hover group relative flex min-h-56 flex-col overflow-hidden rounded-xl p-5"
+            transition={{ delay: index * 0.04, duration: 0.24, ease: 'easeOut' }}
+            className="plaque plaque-hover group relative flex min-h-56 flex-col overflow-hidden rounded-sm p-5"
           >
-            <span className="absolute right-4 top-4 h-16 w-16 rounded-full bg-un-100/40 blur-2xl transition-opacity group-hover:opacity-100" aria-hidden="true" />
-            <span className="grid h-11 w-11 place-items-center rounded-lg bg-un-50 text-un-700 shadow-inner">
+            <span className="absolute inset-x-0 top-0 h-1 bg-un-400" aria-hidden="true" />
+            <span className="grid h-11 w-11 place-items-center rounded-sm bg-un-50 text-un-700">
               <Icon size={20} aria-hidden="true" />
             </span>
-            <h3 className="mt-4 font-serif text-lg font-semibold text-un-900">{title}</h3>
+            <h3 className="mt-4 text-lg font-bold text-un-900">{title}</h3>
             <p className="mt-2 text-sm leading-relaxed text-un-600">{body}</p>
             <span className="mt-auto inline-flex items-center gap-1.5 pt-4 text-sm font-semibold text-un-700">
               {action}

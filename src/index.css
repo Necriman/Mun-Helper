@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,11 +10,9 @@
   }
 
   body {
-    @apply bg-[#f6f8fb] font-sans text-un-900 antialiased;
+    @apply bg-[#f8fafc] font-sans text-un-900 antialiased;
     background-image:
-      radial-gradient(circle at 12% 8%, rgba(76, 147, 214, 0.12), transparent 28rem),
-      radial-gradient(circle at 86% 18%, rgba(212, 175, 95, 0.12), transparent 24rem),
-      linear-gradient(180deg, #f8fbff 0%, #f6f8fb 42%, #ffffff 100%);
+      linear-gradient(180deg, #ffffff 0%, #f8fafc 44%, #ffffff 100%);
   }
 
   ::selection {
@@ -30,11 +28,11 @@
 @layer components {
   /* The one "official plaque" card recipe used across the app */
   .plaque {
-    @apply border border-un-800/10 bg-white/90 shadow-plaque backdrop-blur;
+    @apply border border-slate-200 bg-white shadow-plaque;
   }
 
   .plaque-hover {
-    @apply transition-all duration-300 hover:-translate-y-0.5 hover:border-gold-400/60 hover:shadow-[0_18px_46px_rgba(15,51,85,0.12)];
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-un-300 hover:shadow-[0_14px_34px_rgba(11,31,58,0.1)];
   }
 
   .seal-grid {
@@ -46,16 +44,16 @@
   }
 
   .glass-panel {
-    @apply border border-white/55 bg-white/70 shadow-[0_24px_70px_rgba(15,51,85,0.1)] backdrop-blur-xl;
+    @apply border border-slate-200 bg-white shadow-plaque;
   }
 }
 
 /* Faint meridian/parallel lines behind the hero — a restrained globe motif */
 .bg-meridians {
   background-image:
-    radial-gradient(circle at 50% 18%, rgba(59, 130, 196, 0.18), transparent 30%),
-    repeating-linear-gradient(0deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px),
-    repeating-linear-gradient(90deg, rgba(15, 51, 85, 0.06) 0, rgba(15, 51, 85, 0.06) 1px, transparent 1px, transparent 64px);
+    radial-gradient(circle at 50% 18%, rgba(91, 146, 229, 0.18), transparent 30%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.055) 0, rgba(255, 255, 255, 0.055) 1px, transparent 1px, transparent 72px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.055) 0, rgba(255, 255, 255, 0.055) 1px, transparent 1px, transparent 72px);
   -webkit-mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
   mask-image: radial-gradient(ellipse 85% 60% at 50% 0%, black 30%, transparent 100%);
 }

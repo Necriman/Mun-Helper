@@ -5,22 +5,22 @@ export default {
     extend: {
       fontFamily: {
         // Formal serif for headings — evokes official documents & plaques
-        serif: ['"EB Garamond"', 'Georgia', 'serif'],
+        serif: ['Inter', 'system-ui', 'sans-serif'],
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         // "UN blue" institutional scale — primary brand color
         un: {
-          50: '#EEF5FC',
-          100: '#D7E8F7',
-          200: '#AFD0EF',
-          300: '#7FB3E4',
-          400: '#4C93D6',
-          500: '#2874B8',
-          600: '#1D5C97',
-          700: '#164876',
-          800: '#0F3355',
-          900: '#0A2038',
+          50: '#EAF5FD',
+          100: '#D4EBFA',
+          200: '#A9D6F5',
+          300: '#7FC2EF',
+          400: '#5B92E5',
+          500: '#009EDB',
+          600: '#007DB1',
+          700: '#005F8A',
+          800: '#0B3A5B',
+          900: '#0B1F3A',
         },
         // Gold/bronze accent — laurel, seals, dividers
         gold: {

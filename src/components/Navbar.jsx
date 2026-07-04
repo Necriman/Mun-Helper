@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { LogOut, Menu, Sparkles, ShieldCheck, X } from 'lucide-react';
+import { Globe2, LogOut, Menu, Search, ShieldCheck, X } from 'lucide-react';
 import Emblem from './Emblem';
 import { useAuth } from '../lib/auth-context';
 
@@ -9,11 +9,13 @@ import { useAuth } from '../lib/auth-context';
 // homepage, and a full navigation reliably scrolls to a URL hash on load
 // from any other page, which client-side routing doesn't do out of the box.
 const LINKS = [
-  { href: '/#registry', label: 'Registry' },
+  { href: '/#registry', label: 'Conferences' },
+  { href: '/#academy', label: 'Preparation' },
   { href: '/#tools', label: 'Tools' },
-  { href: '/#academy', label: 'Prep' },
   { href: '/#planned', label: 'Planned' },
 ];
+
+const LANGUAGES = ['EN', 'RU', 'UZ'];
 
 /**
  * Fixed top bar: white, formal, thin gold rule at the foot — a letterhead,
@@ -27,13 +29,14 @@ export default function Navbar() {
   const { session, profile, isStaff, signOut, openAuth } = useAuth();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-3 pt-3">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between rounded-2xl border border-white/70 bg-white/90 px-4 py-3 shadow-[0_18px_45px_rgba(15,51,85,0.12)] backdrop-blur-xl sm:px-5 lg:px-6">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="h-1 bg-un-400" aria-hidden="true" />
+      <nav className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3" aria-label="Mun Helper home">
           <Emblem size={38} />
           <span className="leading-tight">
-            <span className="block font-serif text-lg font-semibold tracking-tight text-un-900">
+            <span className="block text-lg font-bold tracking-tight text-un-900">
               Mun Helper
             </span>
             <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-un-600">
@@ -48,7 +51,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="rounded-full px-3.5 py-2 text-sm font-semibold text-un-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-50 hover:text-un-900"
+              className="min-h-11 rounded-sm border-b-2 border-transparent px-3.5 py-3 text-sm font-semibold text-un-800 transition-colors hover:border-un-400 hover:bg-un-50 hover:text-un-900"
             >
               {link.label}
             </a>
@@ -60,7 +63,7 @@ export default function Navbar() {
           {isStaff && (
             <Link
               to="/admin"
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide text-un-500 transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-50 hover:text-un-800"
+              className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-sm px-3 py-2 text-xs font-semibold uppercase tracking-wide text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
             >
               <ShieldCheck size={14} aria-hidden="true" />
               Admin
@@ -70,12 +73,35 @@ export default function Navbar() {
           {session && (
             <Link
               to="/mentor"
-              className="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-2 text-sm font-medium text-un-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-50 hover:text-un-900"
+              className="inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-sm px-3 py-2 text-sm font-semibold text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
             >
-              <Sparkles size={14} className="text-gold-500" aria-hidden="true" />
+              <Search size={14} className="text-un-500" aria-hidden="true" />
               AI Mentor
             </Link>
           )}
+
+          <a
+            href="/#registry"
+            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-sm border border-slate-200 px-3 py-2 text-sm font-semibold text-un-800 transition-colors hover:border-un-300 hover:bg-un-50"
+          >
+            <Search size={15} aria-hidden="true" />
+            Search
+          </a>
+
+          <div className="flex min-h-11 items-center gap-1 border-l border-slate-200 pl-3" aria-label="Language selector">
+            <Globe2 size={15} className="text-un-600" aria-hidden="true" />
+            {LANGUAGES.map((language) => (
+              <button
+                key={language}
+                type="button"
+                className={`h-8 cursor-pointer rounded-sm px-2 text-xs font-bold transition-colors ${
+                  language === 'EN' ? 'bg-un-900 text-white' : 'text-un-700 hover:bg-un-50'
+                }`}
+              >
+                {language}
+              </button>
+            ))}
+          </div>
 
           {session ? (
             <div className="flex items-center gap-2 pl-1">
@@ -86,7 +112,7 @@ export default function Navbar() {
                 type="button"
                 onClick={signOut}
                 aria-label="Sign out"
-                className="grid h-9 w-9 cursor-pointer place-items-center rounded-full text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
+                className="grid h-11 w-11 cursor-pointer place-items-center rounded-sm text-un-500 transition-colors hover:bg-un-50 hover:text-un-800"
               >
                 <LogOut size={15} />
               </button>
@@ -96,14 +122,14 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => openAuth('signin')}
-                className="cursor-pointer rounded-full px-4 py-2 text-sm font-medium text-un-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-50 hover:text-un-900"
+                className="min-h-11 cursor-pointer rounded-sm px-4 py-2 text-sm font-semibold text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
               >
                 Sign in
               </button>
               <button
                 type="button"
                 onClick={() => openAuth('signup')}
-                className="cursor-pointer rounded-full bg-un-900 px-4 py-2 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(15,51,85,0.18)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-un-800"
+                className="min-h-11 cursor-pointer rounded-sm bg-un-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-un-800"
               >
                 Register delegation
               </button>
@@ -117,7 +143,7 @@ export default function Navbar() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
-          className="grid h-11 w-11 cursor-pointer place-items-center rounded-full text-un-800 transition-colors hover:bg-un-50 md:hidden"
+          className="grid h-11 w-11 cursor-pointer place-items-center rounded-sm text-un-800 transition-colors hover:bg-un-50 md:hidden"
         >
           {open ? <X size={22} /> : <Menu size={22} />}
         </button>
@@ -131,7 +157,7 @@ export default function Navbar() {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="mx-auto mt-2 max-w-7xl overflow-hidden rounded-2xl border border-white/70 bg-white/95 shadow-[0_18px_45px_rgba(15,51,85,0.12)] backdrop-blur-xl md:hidden"
+            className="overflow-hidden border-t border-slate-200 bg-white md:hidden"
           >
             <div className="space-y-1 px-4 py-4">
               {LINKS.map((link) => (
@@ -139,7 +165,7 @@ export default function Navbar() {
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-3 py-2.5 text-sm font-medium uppercase tracking-wide text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
+                  className="block rounded-sm px-3 py-2.5 text-sm font-semibold uppercase tracking-wide text-un-700 transition-colors hover:bg-un-50 hover:text-un-900"
                 >
                   {link.label}
                 </a>
@@ -148,7 +174,7 @@ export default function Navbar() {
                 <Link
                   to="/admin"
                   onClick={() => setOpen(false)}
-                  className="block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium uppercase tracking-wide text-un-700 hover:bg-un-50"
+                  className="block w-full rounded-sm px-3 py-2.5 text-left text-sm font-semibold uppercase tracking-wide text-un-700 hover:bg-un-50"
                 >
                   Admin
                 </Link>
@@ -158,14 +184,14 @@ export default function Navbar() {
                   <Link
                     to="/mentor"
                     onClick={() => setOpen(false)}
-                    className="block w-full rounded-xl px-3 py-2.5 text-left text-sm font-medium text-un-700 hover:bg-un-50"
+                    className="block w-full rounded-sm px-3 py-2.5 text-left text-sm font-semibold text-un-700 hover:bg-un-50"
                   >
                     AI Mentor
                   </Link>
                   <button
                     type="button"
                     onClick={signOut}
-                    className="mt-2 w-full cursor-pointer rounded-xl border border-un-800/15 px-4 py-2.5 text-sm font-semibold text-un-700"
+                    className="mt-2 w-full cursor-pointer rounded-sm border border-un-800/15 px-4 py-2.5 text-sm font-semibold text-un-700"
                   >
                     Sign out
                   </button>
@@ -174,7 +200,7 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => openAuth('signup')}
-                  className="mt-2 w-full cursor-pointer rounded-xl bg-un-900 px-4 py-2.5 text-sm font-semibold text-white"
+                  className="mt-2 w-full cursor-pointer rounded-sm bg-un-900 px-4 py-2.5 text-sm font-semibold text-white"
                 >
                   Register delegation
                 </button>

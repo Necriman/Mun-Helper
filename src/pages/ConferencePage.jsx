@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft, CalendarDays, ExternalLink, Gavel, MapPin, MessageCircle, Send, UserRound, UsersRound } from 'lucide-react';
+import { ArrowLeft, CalendarDays, CalendarPlus, ExternalLink, Gavel, MapPin, MessageCircle, Send, UserRound, UsersRound } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Stars from '../components/conference/Stars';
 import ReviewForm from '../components/conference/ReviewForm';
+import ScrollProgress from '../components/motion/ScrollProgress';
 import { supabase } from '../lib/supabase';
 import { CONFERENCES, STATUS, colorFor } from '../data/conferences';
 import { formatDateRange } from '../lib/utils';
+import { downloadConferenceIcs } from '../lib/ics';
 
 // A couple of illustrative reviews for mock mode — there's no live `reviews`
 // table to read from without Supabase configured.
@@ -140,6 +142,7 @@ export default function ConferencePage() {
 
   return (
     <div className="min-h-dvh">
+      <ScrollProgress />
       <Navbar />
 
       <main className="mx-auto max-w-4xl px-4 pb-16 pt-28 sm:px-6">
@@ -231,6 +234,25 @@ export default function ConferencePage() {
                 <Send size={14} aria-hidden="true" />
                 Share on Telegram
               </a>
+              {conference.date_start && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    downloadConferenceIcs({
+                      title: conference.title,
+                      dateStart: conference.date_start,
+                      dateEnd: conference.date_end,
+                      city: conference.city,
+                      description: conference.description,
+                      url: conference.registration_link ?? window.location.href,
+                    })
+                  }
+                  className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-md border border-un-800/15 px-4 text-sm font-semibold text-un-700 transition-colors hover:border-un-400"
+                >
+                  <CalendarPlus size={14} aria-hidden="true" />
+                  Add to calendar
+                </button>
+              )}
             </div>
           </div>
         </motion.div>

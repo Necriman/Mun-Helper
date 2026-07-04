@@ -347,8 +347,16 @@ async function sendMunList(ctx, edit = false) {
 }
 
 async function sendLinkPrompt(ctx, telegramId) {
+  // Telegram rejects http/localhost URLs in inline buttons (400 Bad Request),
+  // so without a deployed public site there is nothing valid to send.
+  if (!publicSiteUrl) {
+    await ctx.reply(
+      'Account linking will be available as soon as the Mun Helper website goes live. Everything else in the bot already works.',
+    );
+    return;
+  }
   const { data: token, error } = await supabase.rpc('bot_mint_link_token', { p_telegram_id: telegramId });
-  if (error || !token || !publicSiteUrl) {
+  if (error || !token) {
     await ctx.reply('Could not generate an account link right now. Please try again later.');
     return;
   }
@@ -495,6 +503,16 @@ bot.callbackQuery(/^review_conf:(.+)$/, async (ctx) => {
 });
 
 bot.callbackQuery(/^review_rate:(\d)$/, async (ctx) => {
+  // Sessions are in-memory: after a bot restart the draft is gone and this
+  // button press would otherwise produce a review for "undefined".
+  if (!ctx.session.draft?.conferenceId) {
+    await ctx.answerCallbackQuery({
+      text: 'This review session expired. Tap "Leave a review" to start again.',
+      show_alert: true,
+    });
+    return;
+  }
+
   const rating = Number(ctx.match[1]);
   ctx.session.draft.rating = rating;
   ctx.session.step = 'review_comment';
@@ -550,6 +568,18 @@ bot.on('message:text', async (ctx) => {
 
     case 'review_comment': {
       const { conferenceId, conferenceTitle, rating } = ctx.session.draft;
+      // Mock-fallback conferences use slugs as ids; bot_submit_review takes a
+      // uuid, so passing one through would fail with a cryptic Postgres cast
+      // error. Catch it here with a human answer instead.
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(conferenceId));
+      if (!isUuid) {
+        ctx.session.step = null;
+        await ctx.reply(
+          'Reviews are temporarily unavailable while the conference database is offline. Please try again later.',
+          { reply_markup: MAIN_MENU },
+        );
+        return;
+      }
       const comment = text === '-' ? null : text;
       const { error } = await supabase.rpc('bot_submit_review', {
         p_telegram_id: telegramId,
@@ -573,5 +603,27 @@ bot.on('message:text', async (ctx) => {
 bot.catch((err) => console.error('[bot error]', err.error ?? err));
 
 startReminderScheduler();
-bot.start();
-console.log('Mun Helper bot is running.');
+
+/**
+ * Startup hardening. The bot previously died with
+ * "409 Conflict: terminated by setWebhook request" — once a webhook is
+ * registered on the token (by any tool or hosting experiment), Telegram
+ * refuses long polling until it's removed. deleteWebhook() before start
+ * clears that unconditionally, and the retry loop brings the bot back up
+ * if it happens again mid-run instead of leaving the process dead.
+ */
+async function run() {
+  for (;;) {
+    try {
+      await bot.api.deleteWebhook();
+      console.log('Mun Helper bot is running.');
+      await bot.start();
+      return; // clean shutdown (bot.stop() was called)
+    } catch (err) {
+      console.error('[bot crashed, restarting in 5s]', err.description ?? err.message ?? err);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+}
+
+run();

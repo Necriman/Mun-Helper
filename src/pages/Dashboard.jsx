@@ -11,6 +11,9 @@ import ReadinessPanel from '../components/ReadinessPanel';
 import EmptyState from '../components/EmptyState';
 import Footer from '../components/Footer';
 import AdPopupModal from '../components/ads/AdPopupModal';
+import Reveal from '../components/motion/Reveal';
+import ScrollProgress from '../components/motion/ScrollProgress';
+import BackToTop from '../components/motion/BackToTop';
 import { useConferences } from '../hooks/useConferences';
 import { PREP_MATERIALS } from '../data/prepMaterials';
 import { ACTIVE_CAMPAIGN } from '../data/adCampaign';
@@ -83,6 +86,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-dvh">
+      <ScrollProgress />
       <AdPopupModal campaign={ACTIVE_CAMPAIGN} onEvent={logAdEvent} />
 
       <Navbar />
@@ -90,14 +94,18 @@ export default function Dashboard() {
 
       <main className="mx-auto -mt-10 max-w-7xl space-y-16 px-4 pb-12 sm:px-6 lg:px-8">
         {/* ── Pillar 1: the conference registry ── */}
-        <section id="registry" className="ambient-rise scroll-mt-28 space-y-6">
-          <FilterBar
-            query={query}
-            onQueryChange={setQuery}
-            status={statusFilter}
-            onStatusChange={setStatusFilter}
-            counts={counts}
-          />
+        {/* Reveal = scroll-triggered; the old `ambient-rise` CSS animated on
+            page load, so below-the-fold sections finished invisibly. */}
+        <section id="registry" className="scroll-mt-28 space-y-6">
+          <Reveal>
+            <FilterBar
+              query={query}
+              onQueryChange={setQuery}
+              status={statusFilter}
+              onStatusChange={setStatusFilter}
+              counts={counts}
+            />
+          </Reveal>
 
           {nothingVisible ? (
             <EmptyState query={query} onReset={resetFilters} />
@@ -110,23 +118,24 @@ export default function Dashboard() {
         </section>
 
         {/* ── Pillar 2: the knowledge hub ── */}
-        <div className="ambient-rise">
+        <Reveal>
           <InstitutionalBriefing stats={stats} />
-        </div>
+        </Reveal>
 
-        <div className="ambient-rise">
+        <Reveal>
           <ReadinessPanel />
-        </div>
+        </Reveal>
 
-        <div className="ambient-rise">
+        <Reveal>
           <DelegateTools />
-        </div>
-        <div className="ambient-rise">
+        </Reveal>
+        <Reveal>
           <AcademySection />
-        </div>
+        </Reveal>
       </main>
 
       <Footer />
+      <BackToTop />
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 import { animate, motion, useReducedMotion } from 'framer-motion';
 import { ArrowDown, BookOpen, CalendarClock, Globe2, Gavel, Radar } from 'lucide-react';
 import Emblem from './Emblem';
+import { useLanguage } from '../lib/i18n';
 
 const DiplomacyScene = lazy(() => import('./DiplomacyScene'));
 
@@ -40,11 +41,12 @@ const item = {
 };
 
 export default function Hero({ stats }) {
+  const { t } = useLanguage();
   const tiles = [
-    { icon: Globe2, label: 'Open registrations', value: stats.open },
-    { icon: CalendarClock, label: 'Dates announced', value: stats.upcoming },
-    { icon: Radar, label: 'Planned conferences', value: stats.planned },
-    { icon: BookOpen, label: 'Academy guides', value: stats.guides, suffix: '+' },
+    { icon: Globe2, label: t('openRegistrations'), value: stats.open },
+    { icon: CalendarClock, label: t('datesAnnounced'), value: stats.upcoming },
+    { icon: Radar, label: t('plannedConferences'), value: stats.planned },
+    { icon: BookOpen, label: t('academyGuides'), value: stats.guides, suffix: '+' },
   ];
 
   return (
@@ -66,28 +68,27 @@ export default function Hero({ stats }) {
         <motion.div variants={item} className="mx-auto flex max-w-4xl flex-col items-center text-center">
           <div className="relative">
             <span className="absolute -inset-3 rounded-full border border-white/15 bg-white/5" />
-            <Emblem size={88} className="relative drop-shadow-[0_12px_26px_rgba(91,146,229,0.28)]" />
+            <Emblem size={118} className="relative rounded-full drop-shadow-[0_18px_42px_rgba(91,146,229,0.32)]" />
             <span className="absolute -bottom-1 -right-2 grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white text-un-900 shadow-plaque">
               <Gavel size={18} aria-hidden="true" />
             </span>
           </div>
 
           <span className="mt-6 inline-flex items-center gap-2 rounded-sm border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-un-50">
-            Uzbekistan Model UN Registry
+            {t('heroEyebrow')}
           </span>
 
           <h1 className="mt-6 max-w-5xl text-4xl font-extrabold leading-tight text-white sm:text-6xl lg:text-7xl">
-            Discover Model United Nations conferences in Uzbekistan
+            {t('heroTitle')}
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-relaxed text-un-50/90 sm:text-xl">
-            A public registry for upcoming MUN events, preparation materials, reviews, organizer contacts, and verified
-            registration links.
+            {t('heroText')}
           </p>
           <motion.div
             variants={item}
             className="mt-7 grid w-full max-w-2xl grid-cols-1 gap-2 text-left sm:grid-cols-3"
           >
-            {['Public MUN registry', 'Prep library', 'Telegram bot sync'].map((label) => (
+            {[t('heroRegistry'), t('heroPrep'), t('heroBot')].map((label) => (
               <span key={label} className="rounded-sm border border-white/20 bg-white/[0.08] px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-un-50/85">
                 {label}
               </span>
@@ -100,14 +101,14 @@ export default function Hero({ stats }) {
             href="#registry"
             className="group inline-flex h-12 items-center gap-2 rounded-sm bg-white px-6 text-sm font-semibold text-un-900 transition-colors hover:bg-un-50"
           >
-            View MUN registry
+            {t('viewRegistry')}
             <ArrowDown size={15} className="transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
           </a>
           <a
             href="#academy"
             className="inline-flex h-12 items-center gap-2 rounded-sm border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
-            Start preparation
+            {t('startPreparation')}
           </a>
         </motion.div>
 

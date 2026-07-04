@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Mun Helper — a diplomatic-styled conference tracker and academy for Uzbekistan's Model UN community",
+  "description": "MUNIVERSE — a technology-forward conference tracker and academy for Uzbekistan's Model UN community",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

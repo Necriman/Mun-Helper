@@ -62,7 +62,7 @@ export default function AdminLayout() {
           <div className="flex items-center gap-3">
             <Emblem size={30} />
             <div className="leading-tight">
-              <p className="font-serif text-sm font-semibold text-un-900">Mun Helper — Admin</p>
+              <p className="text-sm font-bold text-un-900">MUNIVERSE — Admin</p>
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-un-500">
                 Unified Admin &amp; Analytics Panel
               </p>

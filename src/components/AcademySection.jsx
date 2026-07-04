@@ -11,6 +11,7 @@ import {
   Search,
 } from 'lucide-react';
 import { MATERIAL_CATEGORIES, PREP_MATERIALS, PREP_PATH } from '../data/prepMaterials';
+import { useLanguage } from '../lib/i18n';
 
 const CATEGORY_ICONS = {
   basics: BookOpen,
@@ -70,6 +71,7 @@ function MaterialCard({ material, index }) {
 export default function AcademySection() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [query, setQuery] = useState('');
+  const { t } = useLanguage();
 
   const visibleMaterials = useMemo(() => {
     const normalized = query.trim().toLowerCase();
@@ -92,12 +94,11 @@ export default function AcademySection() {
         <div>
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-un-600">
             <GraduationCap size={16} aria-hidden="true" />
-            MUN preparation library
+            {t('academyEyebrow')}
           </p>
-          <h2 className="mt-2 text-3xl font-bold text-un-900 sm:text-4xl">Preparation resources</h2>
+          <h2 className="mt-2 text-3xl font-bold text-un-900 sm:text-4xl">{t('academyTitle')}</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-un-600">
-            A structured pack of beginner explainers, research guides, position paper help, resolution writing, and
-            English/Russian videos from the MUN BAG channel.
+            {t('academyText')}
           </p>
         </div>
 
@@ -112,8 +113,8 @@ export default function AcademySection() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search preparation materials..."
-              aria-label="Search preparation materials"
+              placeholder={t('searchMaterials')}
+              aria-label={t('searchMaterials')}
               className="h-11 w-full rounded-sm border border-slate-300 bg-white pl-10 pr-3 text-sm text-un-900 placeholder:text-un-500/70 focus:border-un-400 focus:outline-none"
             />
           </div>

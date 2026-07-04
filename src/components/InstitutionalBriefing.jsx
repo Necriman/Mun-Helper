@@ -1,5 +1,6 @@
 import { ArrowUpRight, FileText, Newspaper, ShieldCheck } from 'lucide-react';
 import { PREP_MATERIALS } from '../data/prepMaterials';
+import { useLanguage } from '../lib/i18n';
 
 const UPDATES = [
   {
@@ -28,10 +29,11 @@ const RESOURCE_ROWS = PREP_MATERIALS.slice(0, 5).map((material) => ({
 }));
 
 export default function InstitutionalBriefing({ stats }) {
+  const { t } = useLanguage();
   const metrics = [
-    { label: 'Open registrations', value: stats.open },
-    { label: 'Dates announced', value: stats.upcoming },
-    { label: 'Preparation resources', value: `${stats.guides}+` },
+    { label: t('openRegistrations'), value: stats.open },
+    { label: t('datesAnnounced'), value: stats.upcoming },
+    { label: t('academyGuides'), value: `${stats.guides}+` },
   ];
 
   return (
@@ -40,14 +42,13 @@ export default function InstitutionalBriefing({ stats }) {
         <div className="plaque rounded-sm p-6">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-un-600">
             <ShieldCheck size={15} aria-hidden="true" />
-            Our mission
+            {t('missionEyebrow')}
           </p>
           <h2 id="briefing-title" className="mt-3 text-3xl font-bold leading-tight text-un-900">
-            A clear public desk for Uzbekistan's MUN community
+            {t('missionTitle')}
           </h2>
           <p className="mt-4 text-sm leading-relaxed text-un-700">
-            Mun Helper helps delegates compare conferences, verify registration routes, review organizer information and
-            prepare before committee through a single accessible platform.
+            {t('missionText')}
           </p>
 
           <dl className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -63,7 +64,7 @@ export default function InstitutionalBriefing({ stats }) {
         <div className="plaque rounded-sm p-6">
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-un-600">
             <Newspaper size={15} aria-hidden="true" />
-            Latest updates
+            {t('latestUpdates')}
           </p>
           <div className="mt-4 grid gap-3">
             {UPDATES.map((update) => (
@@ -84,12 +85,12 @@ export default function InstitutionalBriefing({ stats }) {
           <div>
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-un-600">
               <FileText size={15} aria-hidden="true" />
-              Resources and documents
+              {t('resources')}
             </p>
-            <h2 className="mt-1 text-xl font-bold text-un-900">Core preparation files</h2>
+            <h2 className="mt-1 text-xl font-bold text-un-900">{t('coreFiles')}</h2>
           </div>
           <a href="#academy" className="inline-flex min-h-11 items-center gap-2 rounded-sm border border-slate-300 px-3 py-2 text-sm font-semibold text-un-800 transition-colors hover:border-un-400 hover:bg-un-50">
-            View all materials
+            {t('viewAllMaterials')}
             <ArrowUpRight size={15} aria-hidden="true" />
           </a>
         </div>

@@ -1,5 +1,6 @@
 import { BellRing, Bot, ClipboardCheck, MessageCircle, Send, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../lib/i18n';
 
 const TOOLS = [
   {
@@ -33,15 +34,16 @@ const TOOLS = [
 ];
 
 export default function DelegateTools() {
+  const { t } = useLanguage();
   return (
     <section id="tools" className="scroll-mt-28">
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-un-600">
             <ShieldCheck size={15} aria-hidden="true" />
-            Delegate operations desk
+            {t('toolsEyebrow')}
           </p>
-          <h2 className="mt-2 text-2xl font-bold text-un-900">Services around the public registry</h2>
+          <h2 className="mt-2 text-2xl font-bold text-un-900">{t('toolsTitle')}</h2>
         </div>
         <p className="max-w-xl text-sm leading-relaxed text-un-600">
           Built for quick decisions: check dates, inspect organizers, compare channels, read reviews and move to

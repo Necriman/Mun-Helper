@@ -1,8 +1,10 @@
 import { Send } from 'lucide-react';
 import Emblem from './Emblem';
+import { useLanguage } from '../lib/i18n';
 
 /** Formal footer: brand, tagline, community link, and a thin Uzbekistan-flag accent rule. */
 export default function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="mt-20 border-t border-slate-200 bg-white">
       {/* Thin tricolor rule referencing the Uzbekistan flag */}
@@ -14,8 +16,8 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <Emblem size={32} />
           <div>
-            <p className="text-sm font-bold text-un-900">Mun Helper</p>
-            <p className="text-xs text-un-500">The registry for Uzbekistan&apos;s MUN community.</p>
+            <p className="text-sm font-bold text-un-900">{t('brandName')}</p>
+            <p className="text-xs text-un-500">{t('brandTagline')}</p>
           </div>
         </div>
 
@@ -26,10 +28,10 @@ export default function Footer() {
           className="plaque plaque-hover inline-flex min-h-11 items-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold text-un-700"
         >
           <Send size={15} className="text-un-600" aria-hidden="true" />
-          Join the Telegram community
+          {t('telegramCommunity')}
         </a>
 
-        <p className="text-xs text-un-500">© 2026 Mun Helper. Built by delegates, for delegates.</p>
+        <p className="text-xs text-un-500">© 2026 MUNIVERSE. {t('footerText')}</p>
       </div>
     </footer>
   );

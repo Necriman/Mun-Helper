@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Search, X } from 'lucide-react';
+import { useLanguage } from '../lib/i18n';
 
 const FILTERS = [
-  { id: 'all', label: 'All' },
-  { id: 'open', label: 'Open now' },
-  { id: 'upcoming', label: 'Upcoming' },
-  { id: 'planned', label: 'Date TBA' },
+  { id: 'all', labelKey: 'all' },
+  { id: 'open', labelKey: 'openNow' },
+  { id: 'upcoming', labelKey: 'upcoming' },
+  { id: 'planned', labelKey: 'dateTba' },
 ];
 
 /**
@@ -15,6 +16,7 @@ const FILTERS = [
  */
 export default function FilterBar({ query, onQueryChange, status, onStatusChange, counts }) {
   const inputRef = useRef(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onKey = (e) => {
@@ -46,7 +48,7 @@ export default function FilterBar({ query, onQueryChange, status, onStatusChange
               }`}
             >
               <span className="relative z-10">
-                {f.label}
+                {t(f.labelKey)}
                 <span className={`ml-1.5 rounded-sm px-1.5 py-0.5 text-[11px] font-semibold tabular-nums ${
                   active ? 'bg-un-100 text-un-900' : 'bg-white text-un-700'
                 }`}>
@@ -78,8 +80,8 @@ export default function FilterBar({ query, onQueryChange, status, onStatusChange
           type="search"
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
-          placeholder="Search conferences…"
-          aria-label="Search conferences"
+          placeholder={t('searchConferences')}
+          aria-label={t('searchConferences')}
           className="h-11 w-full rounded-sm border border-slate-300 bg-white pl-10 pr-16 text-sm text-un-900 placeholder:text-un-500/70 focus:border-un-400 focus:outline-none"
         />
         {query ? (

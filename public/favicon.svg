@@ -1,17 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle cx="32" cy="32" r="31" fill="#0F3355"/>
-  <circle cx="32" cy="32" r="27" fill="none" stroke="#B08D2E" stroke-width="1.2"/>
-  <!-- meridian lines suggesting a globe -->
-  <g fill="none" stroke="#EEF5FC" stroke-width="1.1" opacity="0.9">
-    <ellipse cx="32" cy="32" rx="10" ry="18"/>
-    <ellipse cx="32" cy="32" rx="18" ry="10"/>
-    <line x1="14" y1="32" x2="50" y2="32"/>
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#061B36"/>
+      <stop offset="0.58" stop-color="#0A2A78"/>
+      <stop offset="1" stop-color="#5B92E5"/>
+    </linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="30" fill="url(#bg)"/>
+  <g fill="none" stroke="#EAF5FD" stroke-width="2" opacity="0.95">
+    <path d="M16 30c6-10 23-16 34-6"/>
+    <path d="M14 38c9 6 25 8 38-2"/>
+    <path d="M24 13c-6 14-5 27 5 39"/>
+    <path d="M40 12c6 14 5 27-5 40"/>
   </g>
-  <!-- laurel-inspired branches, original abstraction -->
-  <g fill="none" stroke="#D4AF5F" stroke-width="1.6" stroke-linecap="round">
-    <path d="M20 44 C16 40 15 34 17 27"/>
-    <path d="M18 30 L21.5 30.5 M17.3 34.5 L21 34.8 M17.4 39 L21 38.6"/>
-    <path d="M44 44 C48 40 49 34 47 27"/>
-    <path d="M46 30 L42.5 30.5 M46.7 34.5 L43 34.8 M46.6 39 L43 38.6"/>
-  </g>
+  <path d="M17 49 32 37l15 12" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M41 21 44 27 50 29 44 32 41 38 38 32 32 29 38 27Z" fill="#FFFFFF"/>
 </svg>

@@ -1,0 +1,203 @@
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+
+export const LANGUAGES = ['EN', 'RU', 'UZ'];
+
+const translations = {
+  EN: {
+    brandName: 'MUNIVERSE',
+    brandTagline: 'Your MUN world. Preparation. Knowledge. Support.',
+    navConferences: 'Conferences',
+    navPreparation: 'Preparation',
+    navTools: 'Tools',
+    navPlanned: 'Planned',
+    navSearch: 'Search',
+    signIn: 'Sign in',
+    registerDelegation: 'Register delegation',
+    heroEyebrow: 'Uzbekistan Model UN universe',
+    heroTitle: 'Your world of MUNs, preparation, knowledge and support',
+    heroText:
+      'Explore upcoming conferences, compare organizers, read reviews, open registration links and prepare with a live resource hub.',
+    heroRegistry: 'MUN schedule',
+    heroPrep: 'Preparation materials',
+    heroBot: 'AI assistant',
+    viewRegistry: 'View MUN registry',
+    startPreparation: 'Start preparation',
+    openRegistrations: 'Open registrations',
+    datesAnnounced: 'Dates announced',
+    plannedConferences: 'Planned conferences',
+    academyGuides: 'Academy guides',
+    all: 'All',
+    openNow: 'Open now',
+    upcoming: 'Upcoming',
+    dateTba: 'Date TBA',
+    searchConferences: 'Search conferences...',
+    missionEyebrow: 'Mission control',
+    missionTitle: "A smarter public desk for Uzbekistan's MUN community",
+    missionText:
+      'MUNIVERSE helps delegates compare conferences, verify registration routes, review organizer information and prepare before committee through a single accessible platform.',
+    latestUpdates: 'Latest updates',
+    resources: 'Resources and documents',
+    coreFiles: 'Core preparation files',
+    viewAllMaterials: 'View all materials',
+    toolsEyebrow: 'Delegate operations desk',
+    toolsTitle: 'Services around the public registry',
+    academyEyebrow: 'MUN preparation library',
+    academyTitle: 'Preparation resources',
+    academyText:
+      'A structured pack of beginner explainers, research guides, position paper help, resolution writing, and English/Russian videos.',
+    searchMaterials: 'Search preparation materials...',
+    readinessTitle: 'Delegate readiness check',
+    readinessText: 'Build a quick preparation plan before applying to a conference.',
+    countryLabel: 'Country or delegation',
+    countryPlaceholder: 'e.g. Uzbekistan, France',
+    committeeLabel: 'Committee',
+    experienceLabel: 'Experience',
+    beginner: 'Beginner',
+    advanced: 'Advanced',
+    generatedPlan: 'Suggested focus',
+    footerText: 'Built by delegates, for delegates.',
+    telegramCommunity: 'Join the Telegram community',
+  },
+  RU: {
+    brandName: 'MUNIVERSE',
+    brandTagline: 'Твой мир МУНов. Подготовка. Знания. Поддержка.',
+    navConferences: 'МУНы',
+    navPreparation: 'Подготовка',
+    navTools: 'Инструменты',
+    navPlanned: 'Планируемые',
+    navSearch: 'Поиск',
+    signIn: 'Войти',
+    registerDelegation: 'Регистрация',
+    heroEyebrow: 'MUN-вселенная Узбекистана',
+    heroTitle: 'Твой мир МУНов, подготовки, знаний и поддержки',
+    heroText:
+      'Смотри предстоящие конференции, сравнивай организаторов, читай отзывы, открывай регистрацию и готовься через единый ресурсный центр.',
+    heroRegistry: 'МУНы по расписанию',
+    heroPrep: 'Материалы для подготовки',
+    heroBot: 'AI ассистент',
+    viewRegistry: 'Открыть реестр МУНов',
+    startPreparation: 'Начать подготовку',
+    openRegistrations: 'Открытые регистрации',
+    datesAnnounced: 'Даты объявлены',
+    plannedConferences: 'Планируемые МУНы',
+    academyGuides: 'Материалы',
+    all: 'Все',
+    openNow: 'Открыто',
+    upcoming: 'Скоро',
+    dateTba: 'Дата позже',
+    searchConferences: 'Поиск конференций...',
+    missionEyebrow: 'Центр управления',
+    missionTitle: 'Умный публичный центр для MUN-сообщества Узбекистана',
+    missionText:
+      'MUNIVERSE помогает делегатам сравнивать конференции, проверять регистрацию, смотреть информацию об организаторах и готовиться к комитету в одном месте.',
+    latestUpdates: 'Актуальное',
+    resources: 'Ресурсы и документы',
+    coreFiles: 'Основные материалы',
+    viewAllMaterials: 'Все материалы',
+    toolsEyebrow: 'Инструменты делегата',
+    toolsTitle: 'Сервисы вокруг публичного реестра',
+    academyEyebrow: 'Библиотека подготовки к MUN',
+    academyTitle: 'Материалы для подготовки',
+    academyText:
+      'Структурированные объяснения для новичков, исследование, position paper, резолюции и видео на английском/русском.',
+    searchMaterials: 'Поиск материалов...',
+    readinessTitle: 'Проверка готовности делегата',
+    readinessText: 'Собери короткий план подготовки перед подачей на конференцию.',
+    countryLabel: 'Страна или делегация',
+    countryPlaceholder: 'например, Узбекистан, Франция',
+    committeeLabel: 'Комитет',
+    experienceLabel: 'Опыт',
+    beginner: 'Новичок',
+    advanced: 'Продвинутый',
+    generatedPlan: 'Рекомендуемый фокус',
+    footerText: 'Создано делегатами для делегатов.',
+    telegramCommunity: 'Открыть Telegram-сообщество',
+  },
+  UZ: {
+    brandName: 'MUNIVERSE',
+    brandTagline: 'MUN olamingiz. Tayyorgarlik. Bilim. Yordam.',
+    navConferences: 'MUNlar',
+    navPreparation: 'Tayyorgarlik',
+    navTools: 'Vositalar',
+    navPlanned: 'Rejadagi',
+    navSearch: 'Qidiruv',
+    signIn: 'Kirish',
+    registerDelegation: 'Ro‘yxatdan o‘tish',
+    heroEyebrow: 'O‘zbekiston Model UN olami',
+    heroTitle: 'MUNlar, tayyorgarlik, bilim va yordam uchun yagona olam',
+    heroText:
+      'Yaqin konferensiyalarni ko‘ring, tashkilotchilarni solishtiring, fikrlarni o‘qing, ro‘yxatdan o‘tish havolalarini oching va resurslar bilan tayyorlaning.',
+    heroRegistry: 'MUN jadvali',
+    heroPrep: 'Tayyorgarlik materiallari',
+    heroBot: 'AI yordamchi',
+    viewRegistry: 'MUN reyestrini ko‘rish',
+    startPreparation: 'Tayyorgarlikni boshlash',
+    openRegistrations: 'Ochiq ro‘yxatlar',
+    datesAnnounced: 'Sanalar e’lon qilingan',
+    plannedConferences: 'Rejadagi MUNlar',
+    academyGuides: 'Materiallar',
+    all: 'Hammasi',
+    openNow: 'Ochiq',
+    upcoming: 'Yaqinda',
+    dateTba: 'Sana keyin',
+    searchConferences: 'Konferensiya qidirish...',
+    missionEyebrow: 'Boshqaruv markazi',
+    missionTitle: 'O‘zbekiston MUN hamjamiyati uchun aqlli ochiq markaz',
+    missionText:
+      'MUNIVERSE delegatlarga konferensiyalarni solishtirish, ro‘yxatdan o‘tish yo‘llarini tekshirish, tashkilotchilar haqida ma’lumot olish va tayyorlanishga yordam beradi.',
+    latestUpdates: 'Yangiliklar',
+    resources: 'Resurslar va hujjatlar',
+    coreFiles: 'Asosiy materiallar',
+    viewAllMaterials: 'Barcha materiallar',
+    toolsEyebrow: 'Delegat vositalari',
+    toolsTitle: 'Ochiq reyestr atrofidagi servislar',
+    academyEyebrow: 'MUN tayyorgarlik kutubxonasi',
+    academyTitle: 'Tayyorgarlik materiallari',
+    academyText:
+      'Boshlovchilar uchun tushuntirishlar, tadqiqot, position paper, rezolyutsiya va ingliz/rus tilidagi videolar.',
+    searchMaterials: 'Material qidirish...',
+    readinessTitle: 'Delegat tayyorgarligi',
+    readinessText: 'Konferensiyaga topshirishdan oldin qisqa tayyorgarlik rejasini tuzing.',
+    countryLabel: 'Davlat yoki delegatsiya',
+    countryPlaceholder: 'masalan, O‘zbekiston, Fransiya',
+    committeeLabel: 'Qo‘mita',
+    experienceLabel: 'Tajriba',
+    beginner: 'Boshlovchi',
+    advanced: 'Tajribali',
+    generatedPlan: 'Tavsiya etilgan fokus',
+    footerText: 'Delegatlar tomonidan delegatlar uchun yaratilgan.',
+    telegramCommunity: 'Telegram hamjamiyatiga o‘tish',
+  },
+};
+
+const LanguageContext = createContext(null);
+
+export function LanguageProvider({ children }) {
+  const [language, setLanguage] = useState(() => {
+    if (typeof window === 'undefined') return 'EN';
+    return localStorage.getItem('muniverse-language') || 'EN';
+  });
+
+  useEffect(() => {
+    document.documentElement.lang = language.toLowerCase();
+    localStorage.setItem('muniverse-language', language);
+  }, [language]);
+
+  const value = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      languages: LANGUAGES,
+      t: (key) => translations[language]?.[key] ?? translations.EN[key] ?? key,
+    }),
+    [language],
+  );
+
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
+}
+
+export function useLanguage() {
+  const value = useContext(LanguageContext);
+  if (!value) throw new Error('useLanguage must be used inside LanguageProvider');
+  return value;
+}

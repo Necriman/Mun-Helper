@@ -197,7 +197,7 @@ export default function AccountLink() {
         )}
 
         <Link to="/" className="mt-4 block text-center text-sm font-medium text-un-600 hover:text-un-900">
-          Back to Mun Helper
+          Back to MUNIVERSE
         </Link>
       </main>
     </div>

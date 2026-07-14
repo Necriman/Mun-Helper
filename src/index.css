@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,32 +9,29 @@
     scroll-behavior: smooth;
   }
 
+  /* Minimal monochrome canvas: white page, near-black type. */
   body {
-    @apply bg-[#f8fafc] font-sans text-un-900 antialiased;
-    background-image:
-      radial-gradient(circle at 18% 8%, rgba(91, 146, 229, 0.14), transparent 28rem),
-      radial-gradient(circle at 86% 18%, rgba(0, 158, 219, 0.1), transparent 24rem),
-      linear-gradient(180deg, #ffffff 0%, #f8fafc 44%, #ffffff 100%);
+    @apply bg-white font-sans text-black antialiased;
   }
 
   ::selection {
-    @apply bg-un-200 text-un-900;
+    @apply bg-black text-white;
   }
 
   /* Consistent, visible keyboard focus everywhere (a11y) */
   :focus-visible {
-    @apply outline-none ring-[3px] ring-un-400 ring-offset-2 ring-offset-paper;
+    @apply outline-none ring-2 ring-black/60 ring-offset-2 ring-offset-white;
   }
 }
 
 @layer components {
-  /* The one "official plaque" card recipe used across the app */
+  /* The one card recipe used across the app — thin hairline, no glass. */
   .plaque {
-    @apply border border-slate-200 bg-white shadow-plaque;
+    @apply border border-black/10 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.05)];
   }
 
   .plaque-hover {
-    @apply transition-all duration-200 hover:-translate-y-0.5 hover:border-un-300 hover:shadow-[0_14px_34px_rgba(11,31,58,0.1)];
+    @apply transition-all duration-300 hover:-translate-y-1 hover:border-black/25 hover:shadow-[0_18px_60px_rgba(0,0,0,0.09)];
   }
 
   .seal-grid {
@@ -45,12 +42,21 @@
     background-size: 100% 100%, 14px 14px, 14px 14px;
   }
 
+  /* Light equivalents of the old dark shells — same class names so every
+     page keeps working; the dark text/bg override blocks that used to live
+     here are gone (they forced white text inside cards on the light theme
+     and created an @apply circular dependency with .plaque's bg-white). */
   .glass-panel {
-    @apply border border-slate-200 bg-white shadow-plaque;
+    @apply border border-black/10 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.05)];
   }
 
   .tech-card {
-    @apply border border-un-200/80 bg-white/90 shadow-[0_24px_70px_rgba(11,31,58,0.08)] backdrop-blur;
+    @apply border border-black/10 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.05)];
+  }
+
+  .mun-nav-shell {
+    min-height: 72px;
+    background: rgba(255, 255, 255, 0.9);
   }
 }
 
@@ -78,6 +84,41 @@
   mask-image: linear-gradient(180deg, transparent, black 18%, black 72%, transparent);
 }
 
+.diplomatic-reveal {
+  --spot-x: 50%;
+  --spot-y: 46%;
+  pointer-events: none;
+}
+
+.diplomatic-reveal__live {
+  opacity: 0.92;
+  -webkit-mask-image: radial-gradient(circle 17rem at var(--spot-x) var(--spot-y), black 0 34%, rgba(0, 0, 0, 0.76) 54%, transparent 100%);
+  mask-image: radial-gradient(circle 17rem at var(--spot-x) var(--spot-y), black 0 34%, rgba(0, 0, 0, 0.76) 54%, transparent 100%);
+}
+
+.diplomatic-line {
+  fill: none;
+  stroke: rgba(209, 250, 229, 0.58);
+  stroke-width: 0.18;
+  stroke-linecap: round;
+  stroke-dasharray: 3 4;
+  filter: drop-shadow(0 0 7px rgba(16, 185, 129, 0.8));
+}
+
+.green-grid {
+  background-image:
+    linear-gradient(rgba(209, 250, 229, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(209, 250, 229, 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 0%, rgba(16, 185, 129, 0.18), transparent 30rem);
+  background-size: 72px 72px, 72px 72px, 100% 100%;
+  -webkit-mask-image: linear-gradient(180deg, black, transparent 78%);
+  mask-image: linear-gradient(180deg, black, transparent 78%);
+}
+
+.diplomatic-node {
+  transform: translate(-50%, -50%);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .hero-scanline {
     animation: scanline-drift 12s linear infinite;
@@ -85,6 +126,22 @@
 
   .ambient-rise {
     animation: ambient-rise 900ms ease-out both;
+  }
+
+  .diplomatic-line {
+    animation: diplomatic-dash 8s linear infinite;
+  }
+
+  .diplomatic-line--delay {
+    animation-delay: -2.4s;
+  }
+
+  .diplomatic-line--slow {
+    animation-duration: 11s;
+  }
+
+  .diplomatic-node {
+    animation: diplomatic-pulse 2.6s ease-in-out infinite;
   }
 }
 
@@ -108,18 +165,39 @@
   }
 }
 
-/* Thin scrollbar matching the paper canvas */
+@keyframes diplomatic-dash {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+@keyframes diplomatic-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+/* Thin monochrome scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #faf8f3;
+  background: #ffffff;
 }
 ::-webkit-scrollbar-thumb {
-  background: #c9d6e3;
+  background: #d4d4d8;
   border-radius: 8px;
-  border: 2px solid #faf8f3;
+  border: 2px solid #ffffff;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a9bccf;
+  background: #a1a1aa;
 }

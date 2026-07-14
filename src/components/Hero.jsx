@@ -1,133 +1,110 @@
-import { lazy, Suspense, useEffect, useRef } from 'react';
-import { animate, motion, useReducedMotion } from 'framer-motion';
-import { ArrowDown, BookOpen, CalendarClock, Globe2, Gavel, Radar } from 'lucide-react';
-import Emblem from './Emblem';
+import { lazy, Suspense } from 'react';
+import { motion } from 'framer-motion';
 import { useLanguage } from '../lib/i18n';
 
 const DiplomacyScene = lazy(() => import('./DiplomacyScene'));
 
-function CountUp({ to, suffix = '' }) {
-  const ref = useRef(null);
-  const reduceMotion = useReducedMotion();
+/** Shared easing for the whole entrance choreography. */
+const EASE = [0.16, 1, 0.3, 1];
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node) return undefined;
-    if (reduceMotion) {
-      node.textContent = `${to}${suffix}`;
-      return undefined;
-    }
-    const controls = animate(0, to, {
-      duration: 1.1,
-      ease: 'easeOut',
-      onUpdate: (v) => {
-        node.textContent = `${Math.round(v)}${suffix}`;
-      },
-    });
-    return () => controls.stop();
-  }, [to, suffix, reduceMotion]);
-
-  return <span ref={ref}>0</span>;
-}
-
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.08 } },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-};
-
+/**
+ * Minimal monochrome hero. Layout follows the reference composition:
+ * full-viewport section, the 3D diplomacy scene as a centered background
+ * layer (80%-ish frame on mobile, full-bleed on desktop), and the actual
+ * content pinned to the bottom over a white fade-up gradient — light
+ * 300-weight display heading, one black pill CTA + one outline CTA,
+ * small tag pills on the right.
+ */
 export default function Hero({ stats }) {
   const { t } = useLanguage();
-  const tiles = [
-    { icon: Globe2, label: t('openRegistrations'), value: stats.open },
-    { icon: CalendarClock, label: t('datesAnnounced'), value: stats.upcoming },
-    { icon: Radar, label: t('plannedConferences'), value: stats.planned },
-    { icon: BookOpen, label: t('academyGuides'), value: stats.guides, suffix: '+' },
-  ];
 
   return (
-    <section id="top" className="relative min-h-[780px] overflow-hidden bg-un-900 pb-16 pt-28 text-white sm:pb-20 sm:pt-32">
-      <div className="bg-meridians absolute inset-0" aria-hidden="true" />
-      <div className="absolute inset-0 opacity-95" aria-hidden="true">
-        <Suspense fallback={null}>
-          <DiplomacyScene />
-        </Suspense>
+    <section id="top" className="relative flex min-h-screen flex-col justify-end overflow-hidden bg-white">
+      {/* ── Background: 3D scene in a centered frame ── */}
+      <div className="absolute inset-0 z-0 grid place-items-center" aria-hidden="true">
+        <motion.div
+          initial={{ opacity: 0, scale: 1.05 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.8, ease: EASE }}
+          className="h-[72%] w-[88%] overflow-hidden rounded-[2rem] bg-[#061b36] md:h-full md:w-full md:rounded-none"
+        >
+          <Suspense fallback={null}>
+            <DiplomacyScene />
+          </Suspense>
+        </motion.div>
+        {/* White fades: top keeps the navbar readable, bottom carries the content */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white via-white/70 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-white via-white/80 to-transparent" />
       </div>
-      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(11,31,58,0.52),rgba(11,31,58,0.96))]" aria-hidden="true" />
 
+      {/* ── Bottom-pinned content ── */}
       <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="relative mx-auto flex min-h-[640px] max-w-7xl flex-col justify-center px-4 sm:px-6 lg:px-8"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1, delay: 0.5, ease: EASE }}
+        className="relative z-30 mx-auto w-full max-w-7xl px-4 pb-10 pt-24 sm:px-6 lg:px-8"
       >
-        <motion.div variants={item} className="mx-auto flex max-w-4xl flex-col items-center text-center">
-          <div className="relative">
-            <span className="absolute -inset-3 rounded-full border border-white/15 bg-white/5" />
-            <Emblem size={118} className="relative rounded-full drop-shadow-[0_18px_42px_rgba(91,146,229,0.32)]" />
-            <span className="absolute -bottom-1 -right-2 grid h-10 w-10 place-items-center rounded-full border border-white/70 bg-white text-un-900 shadow-plaque">
-              <Gavel size={18} aria-hidden="true" />
-            </span>
+        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between md:gap-8">
+          <div className="max-w-3xl">
+            <motion.p
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6, ease: EASE }}
+              className="flex items-center gap-2 text-[13px] text-black/55"
+            >
+              <span className="h-2 w-2 shrink-0 rounded-full bg-black" aria-hidden="true" />
+              {t('heroEyebrow')}
+            </motion.p>
+
+            <motion.h1
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8, ease: EASE }}
+              className="mt-4 text-[clamp(2rem,8vw,4.5rem)] font-light leading-[1] tracking-[-0.03em] text-black md:text-[clamp(2.5rem,5.5vw,4.5rem)]"
+            >
+              {t('heroTitle')}
+            </motion.h1>
+
+            <motion.div
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.8, delay: 1.0, ease: EASE }}
+              className="mt-6 flex flex-wrap items-center gap-2.5"
+            >
+              <a
+                href="#registry"
+                className="inline-flex h-11 items-center rounded-full bg-black px-6 text-[13px] font-medium text-white transition-opacity hover:opacity-80"
+              >
+                {t('viewRegistry')}
+              </a>
+              <a
+                href="#academy"
+                className="inline-flex h-11 items-center rounded-full border border-black/35 px-6 text-[13px] font-medium text-black transition-colors hover:bg-black/5"
+              >
+                {t('startPreparation')}
+              </a>
+              <span className="ml-1 text-[13px] tabular-nums text-black/45">
+                {stats.open} open · {stats.upcoming} upcoming · {stats.planned} planned · {stats.guides}+ guides
+              </span>
+            </motion.div>
           </div>
 
-          <span className="mt-6 inline-flex items-center gap-2 rounded-sm border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-un-50">
-            {t('heroEyebrow')}
-          </span>
-
-          <h1 className="mt-6 max-w-5xl text-4xl font-extrabold leading-tight text-white sm:text-6xl lg:text-7xl">
-            {t('heroTitle')}
-          </h1>
-          <p className="mt-5 max-w-3xl text-base leading-relaxed text-un-50/90 sm:text-xl">
-            {t('heroText')}
-          </p>
           <motion.div
-            variants={item}
-            className="mt-7 grid w-full max-w-2xl grid-cols-1 gap-2 text-left sm:grid-cols-3"
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 1.0, ease: EASE }}
+            className="flex flex-wrap gap-2 md:justify-end"
           >
-            {[t('heroRegistry'), t('heroPrep'), t('heroBot')].map((label) => (
-              <span key={label} className="rounded-sm border border-white/20 bg-white/[0.08] px-3 py-2 text-center text-xs font-semibold uppercase tracking-wide text-un-50/85">
-                {label}
+            {[t('heroRegistry'), t('heroPrep'), t('heroBot')].map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-black/12 bg-white px-3.5 py-2 text-[11px] font-medium text-black"
+              >
+                {tag}
               </span>
             ))}
           </motion.div>
-        </motion.div>
-
-        <motion.div variants={item} className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="#registry"
-            className="group inline-flex h-12 items-center gap-2 rounded-sm bg-white px-6 text-sm font-semibold text-un-900 transition-colors hover:bg-un-50"
-          >
-            {t('viewRegistry')}
-            <ArrowDown size={15} className="transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
-          </a>
-          <a
-            href="#academy"
-            className="inline-flex h-12 items-center gap-2 rounded-sm border border-white/30 bg-transparent px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
-          >
-            {t('startPreparation')}
-          </a>
-        </motion.div>
-
-        <motion.dl variants={item} className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          {tiles.map(({ icon: Icon, label, value, suffix }) => (
-            <motion.div
-              key={label}
-              whileHover={{ y: -3 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="rounded-sm border border-white/18 bg-white/[0.08] p-4 text-center sm:p-5"
-            >
-              <Icon size={20} className="mx-auto text-un-100" aria-hidden="true" />
-              <dd className="mt-3 text-3xl font-bold tabular-nums text-white">
-                <CountUp to={value} suffix={suffix ?? ''} />
-              </dd>
-              <dt className="mt-1 text-xs font-medium uppercase tracking-wide text-un-100/80">{label}</dt>
-            </motion.div>
-          ))}
-        </motion.dl>
+        </div>
       </motion.div>
     </section>
   );

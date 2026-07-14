@@ -6,7 +6,7 @@ import { useLanguage } from '../lib/i18n';
 export default function Footer() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-20 border-t border-slate-200 bg-white">
+    <footer className="mt-20 border-t border-white/10 bg-[#020817]">
       {/* Thin tricolor rule referencing the Uzbekistan flag */}
       <div className="h-1 w-full bg-un-500" aria-hidden="true">
         <div className="h-full w-full bg-gradient-to-r from-un-500 via-white/40 to-green-600/70" />
@@ -16,8 +16,8 @@ export default function Footer() {
         <div className="flex items-center gap-3">
           <Emblem size={32} />
           <div>
-            <p className="text-sm font-bold text-un-900">{t('brandName')}</p>
-            <p className="text-xs text-un-500">{t('brandTagline')}</p>
+            <p className="text-sm font-bold text-white">{t('brandName')}</p>
+            <p className="text-xs text-un-100/62">{t('brandTagline')}</p>
           </div>
         </div>
 
@@ -25,7 +25,7 @@ export default function Footer() {
           href="https://t.me"
           target="_blank"
           rel="noreferrer"
-          className="plaque plaque-hover inline-flex min-h-11 items-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold text-un-700"
+          className="plaque plaque-hover inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-un-50"
         >
           <Send size={15} className="text-un-600" aria-hidden="true" />
           {t('telegramCommunity')}
